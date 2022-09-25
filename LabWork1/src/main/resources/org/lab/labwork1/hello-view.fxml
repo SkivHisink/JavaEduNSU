@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="364.0" prefWidth="637.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.lab.labwork1.Controller">
+   <children>
+       <Button layoutX="589.0" layoutY="338.0" onAction="#onHelloButtonClick" text="Hello!" />
+   
+                                        <Label fx:id="welcomeText" layoutX="344.0" layoutY="298.0" prefHeight="34.0" prefWidth="292.0" textAlignment="JUSTIFY" />
+      <Button layoutY="2.0" mnemonicParsing="false" onAction="#onOpenExcelButtonClick" text="Open init param" />
+      <TableView fx:id="resultTable" layoutY="26.0" prefHeight="337.0" prefWidth="588.0">
+        <columns>
+          <TableColumn prefWidth="75.0" text="C1" />
+          <TableColumn prefWidth="75.0" text="C2" />
+        </columns>
+      </TableView>
+   </children>
+</AnchorPane>
