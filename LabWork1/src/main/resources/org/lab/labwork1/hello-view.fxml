@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
@@ -14,9 +18,29 @@
       <Button layoutY="2.0" mnemonicParsing="false" onAction="#onOpenExcelButtonClick" text="Open init param" />
       <TableView fx:id="resultTable" layoutY="26.0" prefHeight="337.0" prefWidth="588.0">
         <columns>
-          <TableColumn prefWidth="75.0" text="C1" />
-          <TableColumn prefWidth="75.0" text="C2" />
+          <TableColumn prefWidth="28.0" text="" />
+          <TableColumn prefWidth="89.0" text="Кол-во дней пользования заемными средствами" />
+            <TableColumn prefWidth="93.0" text="Дата платежа" />
+            <TableColumn prefWidth="64.0" text="Общая сумма платежа" />
+            <TableColumn prefWidth="64.0" text="в том числе">
+               <columns>
+                  <TableColumn prefWidth="64.0" text="сумма процентов" />
+                  <TableColumn prefWidth="64.0" text="сумма погашаемого долга" />
+                  <TableColumn prefWidth="64.0" text="остаток задолжности" />
+               </columns>
+            </TableColumn>
         </columns>
       </TableView>
+      <ComboBox layoutX="103.0" layoutY="2.0" prefWidth="150.0" />
+      <Button layoutX="253.0" layoutY="2.0" mnemonicParsing="false" text="Save in Excel" />
+      <Button layoutX="337.0" layoutY="2.0" mnemonicParsing="false" text="Draw graphic" />
+      <LineChart layoutY="30.0" prefHeight="337.0" prefWidth="588.0" visible="false">
+        <xAxis>
+          <CategoryAxis side="BOTTOM" />
+        </xAxis>
+        <yAxis>
+          <NumberAxis side="LEFT" />
+        </yAxis>
+      </LineChart>
    </children>
 </AnchorPane>
