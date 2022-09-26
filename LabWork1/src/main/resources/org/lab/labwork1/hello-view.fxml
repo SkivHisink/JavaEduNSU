@@ -17,7 +17,7 @@
    
                                         <Label fx:id="welcomeText" layoutX="388.0" layoutY="78.0" prefHeight="34.0" prefWidth="292.0" textAlignment="JUSTIFY" />
       <Button layoutY="2.0" mnemonicParsing="false" onAction="#onOpenExcelButtonClick" text="Open init param" />
-      <TableView fx:id="resultTable" layoutX="4.0" layoutY="157.0" prefHeight="373.0" prefWidth="713.0">
+      <TableView fx:id="resultTable" layoutX="4.0" layoutY="157.0" prefHeight="339.0" prefWidth="713.0">
         <columns>
           <TableColumn prefWidth="28.0" text="" />
           <TableColumn prefWidth="104.0" text="Кол-во дней пользования заемными средствами" />
@@ -32,7 +32,7 @@
             </TableColumn>
         </columns>
       </TableView>
-      <ComboBox layoutX="7.0" layoutY="30.0" prefWidth="150.0" />
+      <ComboBox fx:id="calculationType" layoutX="7.0" layoutY="30.0" prefWidth="150.0" />
       <Button layoutX="103.0" layoutY="2.0" mnemonicParsing="false" text="Save in Excel" />
       <Button layoutX="301.0" layoutY="30.0" mnemonicParsing="false" text="Draw graphic" />
       <Label layoutX="29.0" layoutY="55.0" text="Credit size:">
@@ -41,7 +41,7 @@
          </font>
       </Label>
       <Button layoutX="163.0" layoutY="30.0" mnemonicParsing="false" text="Calculate" />
-      <LineChart layoutY="157.0" prefHeight="373.0" prefWidth="720.0" visible="false">
+      <LineChart layoutY="157.0" prefHeight="339.0" prefWidth="720.0" visible="false">
         <xAxis>
           <CategoryAxis side="BOTTOM" />
         </xAxis>
@@ -67,6 +67,11 @@
       <Label layoutX="27.0" layoutY="119.0" prefHeight="16.0" prefWidth="69.0" text="Credit date:" textAlignment="RIGHT">
          <font>
             <Font name="Times New Roman" size="14.0" />
+         </font>
+      </Label>
+      <Label fx:id="infoText" layoutX="9.0" layoutY="500.0" prefHeight="34.0" prefWidth="693.0" text="INFO:">
+         <font>
+            <Font size="14.0" />
          </font>
       </Label>
    </children>
