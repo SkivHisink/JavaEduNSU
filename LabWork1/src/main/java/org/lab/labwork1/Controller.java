@@ -8,6 +8,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.File;
@@ -16,8 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 
-public class Controller
-{
+public class Controller {
     @FXML
     private Label welcomeText;
     @FXML
@@ -29,41 +30,104 @@ public class Controller
     private Label infoText; // like a log for user
     private List<String> val;
     private ObservableList<String> observableList;
+    private String creditAmountLabelText = "Credit amount:";
     @FXML
-    protected void onHelloButtonClick()
-    {
+    private Label creditAmount;
+    private String creditTermLabelText = "Credit term:";
+    @FXML
+    private Label creditTerm;
+    private String interestRateLabelText = "Interest rate:";
+    @FXML
+    private Label interestRate;
+    private String paymentDateLabelText = "Payment date:";
+    @FXML
+    private Label paymentDate;
+    private String dayOfTheContractLabelText = "Credit date:";
+    @FXML
+    private Label dayOfTheContract;
+//Data
+    String dayofTheContractVal;
+    int paymentDateVal;
+    double interestRateVal;
+    int creditTermVal;
+    double creditAmountVal;
+// Additional
+    boolean isReaded = false;
+    @FXML
+    protected void onHelloButtonClick() {
         //test button
         welcomeText.setText("Welcome to JavaFX Application!");
         infoText.setText(infoBegin + "Test button is work successfully.");
     }
-    public Controller()
-    {
+
+    public Controller() {
         //Generating payment types
         val = new ArrayList<String>();
         val.add("Annuity payment");
         val.add("Different payment");
         observableList = FXCollections.observableList(val);
     }
+
     @FXML
     protected void onOpenExcelButtonClick() throws IOException {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Open File");
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
-                "Excel files (*.xlsx;*.xls)",
-                "*.xlsx", "*.xls");
+                "Excel files (*.xlsx)", // TODO: ;*.xls
+                "*.xlsx"); // TODO: add supporting of , "*.xls"
         chooser.getExtensionFilters().add(extFilter);
         extFilter = new FileChooser.ExtensionFilter(
                 "Any files (*.*)",
                 "*.*");
         chooser.getExtensionFilters().add(extFilter);
-        calculationType.setItems(observableList);
-        calculationType.setValue(val.get(0));
         File file = chooser.showOpenDialog(new Stage());
-        if (file != null)
-        {
+        if (file != null) {
             FileInputStream fileInputStream = new FileInputStream(file.getPath());
-            XSSFWorkbook hssfWorkbook = new XSSFWorkbook(fileInputStream);
+            XSSFWorkbook xssfWorkbook = new XSSFWorkbook(fileInputStream);
+            Sheet sheet = xssfWorkbook.getSheet(xssfWorkbook.getSheetName(0));
+            Row row = sheet.getRow(1);
+            if (row == null) {
+                // TODO: write something in INFO
+                return;
+            }
+            if (row.getCell(4) == null) {
+                // TODO: write something in INFO
+                return;
+            }
+            // getting data from file
+            creditAmountVal = row.getCell(0).getNumericCellValue();
+            creditTermVal = (int)row.getCell(1).getNumericCellValue();
+            interestRateVal = row.getCell(2).getNumericCellValue();
+            paymentDateVal = (int)row.getCell(3).getNumericCellValue();
+            dayofTheContractVal = row.getCell(4).getStringCellValue();
+            // setting data to interface
+            creditAmount.setText(creditAmountLabelText + creditAmountVal+" month");
+            creditTerm.setText(creditTermLabelText + creditTermVal);
+            interestRate.setText(interestRateLabelText + interestRateVal+"%");
+            paymentDate.setText(paymentDateLabelText + paymentDateVal);
+            dayOfTheContract.setText(dayOfTheContractLabelText + dayofTheContractVal);
+            //
+            calculationType.setItems(observableList);
+            calculationType.setValue(val.get(0));
+            // Finish
+            isReaded = true;
         }
     }
 
+    @FXML
+    protected void onCalculateButton()
+    {
+        if(!isReaded){
+            // TODO: send signal to info
+            return;
+        }
+        // Annuity payment
+        if(calculationType.getValue()==val.get(0)){
+
+        }
+        // Different payment
+        else{
+
+        }
+    }
 }

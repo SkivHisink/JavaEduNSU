@@ -35,12 +35,12 @@
       <ComboBox fx:id="calculationType" layoutX="7.0" layoutY="30.0" prefWidth="150.0" />
       <Button layoutX="103.0" layoutY="2.0" mnemonicParsing="false" text="Save in Excel" />
       <Button layoutX="301.0" layoutY="30.0" mnemonicParsing="false" text="Draw graphic" />
-      <Label layoutX="29.0" layoutY="55.0" text="Credit size:">
+      <Label fx:id="creditAmount" layoutX="9.0" layoutY="55.0" text="Credit amount:">
          <font>
             <Font name="Times New Roman" size="14.0" />
          </font>
       </Label>
-      <Button layoutX="163.0" layoutY="30.0" mnemonicParsing="false" text="Calculate" />
+      <Button layoutX="163.0" layoutY="30.0" mnemonicParsing="false" onAction="#onCalculateButton" text="Calculate" />
       <LineChart layoutY="157.0" prefHeight="339.0" prefWidth="720.0" visible="false">
         <xAxis>
           <CategoryAxis side="BOTTOM" />
@@ -49,22 +49,22 @@
           <NumberAxis side="LEFT" />
         </yAxis>
       </LineChart>
-      <Label layoutX="25.0" layoutY="71.0" text="Credit term:">
+      <Label fx:id="creditTerm" layoutX="25.0" layoutY="71.0" text="Credit term:">
          <font>
             <Font name="Times New Roman" size="14.0" />
          </font>
       </Label>
-      <Label layoutX="23.0" layoutY="87.0" text="Interest rate:">
+      <Label fx:id="interestRate" layoutX="23.0" layoutY="87.0" text="Interest rate:">
          <font>
             <Font name="Times New Roman" size="14.0" />
          </font>
       </Label>
-      <Label layoutX="14.0" layoutY="103.0" text="Payment date:">
+      <Label fx:id="paymentDate" layoutX="14.0" layoutY="103.0" text="Payment date:">
          <font>
             <Font name="Times New Roman" size="14.0" />
          </font>
       </Label>
-      <Label layoutX="27.0" layoutY="119.0" prefHeight="16.0" prefWidth="69.0" text="Credit date:" textAlignment="RIGHT">
+      <Label fx:id="dayOfTheContract" layoutX="27.0" layoutY="119.0" prefHeight="16.0" prefWidth="300.0" text="Credit date:">
          <font>
             <Font name="Times New Roman" size="14.0" />
          </font>
