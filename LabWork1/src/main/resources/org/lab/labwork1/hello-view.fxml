@@ -13,17 +13,16 @@
 
 <AnchorPane prefHeight="534.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.lab.labwork1.Controller">
    <children>
-       <Button layoutX="486.0" layoutY="43.0" onAction="#onHelloButtonClick" text="Hello!" />
    
                                         <Label fx:id="welcomeText" layoutX="388.0" layoutY="78.0" prefHeight="34.0" prefWidth="292.0" textAlignment="JUSTIFY" />
       <Button layoutY="2.0" mnemonicParsing="false" onAction="#onOpenExcelButtonClick" text="Open init param" />
-      <TableView fx:id="resultTable" layoutX="4.0" layoutY="157.0" prefHeight="339.0" prefWidth="589.0">
+      <TableView fx:id="resultTable" disable="true" layoutX="4.0" layoutY="157.0" prefHeight="339.0" prefWidth="589.0">
         <columns>
-          <TableColumn fx:id="col1" prefWidth="28.0" text="n" />
-          <TableColumn fx:id="col2" prefWidth="104.0" text="Кол-во дней пользования заемными средствами" />
-            <TableColumn fx:id="col3" prefWidth="101.0" text="Дата платежа" />
+          <TableColumn fx:id="col1" editable="false" prefWidth="28.0" text="n" />
+          <TableColumn fx:id="col2" editable="false" prefWidth="104.0" text="Кол-во дней пользования заемными средствами" />
+            <TableColumn fx:id="col3" editable="false" prefWidth="101.0" text="Дата платежа" />
             <TableColumn fx:id="col4" prefWidth="151.0" text="Общая сумма платежа" />
-            <TableColumn prefWidth="169.0" text="в том числе">
+            <TableColumn editable="false" prefWidth="169.0" text="в том числе">
                <columns>
                   <TableColumn fx:id="col5" prefWidth="64.0" text="сумма процентов" />
                   <TableColumn fx:id="col6" prefWidth="64.0" text="сумма погашаемого долга" />
@@ -32,16 +31,16 @@
             </TableColumn>
         </columns>
       </TableView>
-      <ComboBox fx:id="calculationType" layoutX="7.0" layoutY="30.0" prefWidth="150.0" />
-      <Button layoutX="103.0" layoutY="2.0" mnemonicParsing="false" text="Save in Excel" />
-      <Button layoutX="301.0" layoutY="30.0" mnemonicParsing="false" text="Draw graphic" />
+      <ComboBox fx:id="calculationType" disable="true" layoutX="7.0" layoutY="30.0" prefWidth="150.0" />
+      <Button fx:id="saveInExcelButton" onAction="#onSaveInExcelButton" disable="true" layoutX="103.0" layoutY="2.0" mnemonicParsing="false" text="Save in Excel" />
+      <Button fx:id="drawGraphicButton" disable="true" layoutX="301.0" layoutY="30.0" mnemonicParsing="false" onAction="#onDrawGraphicButton" text="Draw graphic" />
       <Label fx:id="creditAmount" layoutX="9.0" layoutY="55.0" text="Credit amount:">
          <font>
             <Font name="Times New Roman" size="14.0" />
          </font>
       </Label>
-      <Button layoutX="163.0" layoutY="30.0" mnemonicParsing="false" onAction="#onCalculateButton" text="Calculate" />
-      <LineChart layoutY="157.0" prefHeight="339.0" prefWidth="589.0" visible="false">
+      <Button fx:id="calculateButton" disable="true" layoutX="163.0" layoutY="30.0" mnemonicParsing="false" onAction="#onCalculateButton" text="Calculate" />
+      <LineChart fx:id="graphicLineChart" layoutY="157.0" prefHeight="339.0" prefWidth="589.0" visible="false">
         <xAxis>
           <CategoryAxis side="BOTTOM" />
         </xAxis>

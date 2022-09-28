@@ -4,25 +4,23 @@ import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.XYChart;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 public class Controller {
-    // Elements in UL
+    // Elements in UI
     @FXML
     private Label welcomeText;
     @FXML
@@ -44,6 +42,12 @@ public class Controller {
     @FXML
     private ComboBox calculationType;
     @FXML
+    private Button saveInExcelButton;
+    @FXML
+    private Button calculateButton;
+    @FXML
+    private Button drawGraphicButton;
+    @FXML
     private Label infoText; // like a log for user
     private List<String> val;
     private ObservableList<String> observableList;
@@ -62,6 +66,8 @@ public class Controller {
     private String dayOfTheContractLabelText = "Credit date:";
     @FXML
     private Label dayOfTheContract;
+    @FXML
+    private LineChart graphicLineChart;
     //Data
     String dayofTheContractVal;
     int paymentDateVal;
@@ -71,13 +77,8 @@ public class Controller {
     // Additional
     private String infoBegin = "INFO:";
     boolean isReaded = false;
-
-    @FXML
-    protected void onHelloButtonClick() {
-        //test button
-        welcomeText.setText("Welcome to JavaFX Application!");
-        infoText.setText(infoBegin + "Test button is work successfully.");
-    }
+    boolean isCalculated = false;
+    PaymentBase paymentMethod = null;
 
     public Controller() {
         //Generating payment types
@@ -119,9 +120,13 @@ public class Controller {
             interestRateVal = row.getCell(2).getNumericCellValue();
             paymentDateVal = (int) row.getCell(3).getNumericCellValue();
             dayofTheContractVal = row.getCell(4).getStringCellValue();
+            if(paymentDateVal>28){
+                infoText.setText(infoBegin + "Payment date must be less or equal to 28.");
+                return;
+            }
             // setting data to interface
-            creditAmount.setText(creditAmountLabelText + creditAmountVal + " month");
-            creditTerm.setText(creditTermLabelText + creditTermVal);
+            creditAmount.setText(creditAmountLabelText + creditAmountVal + "₽");
+            creditTerm.setText(creditTermLabelText + creditTermVal + " month");
             interestRate.setText(interestRateLabelText + interestRateVal + "%");
             paymentDate.setText(paymentDateLabelText + paymentDateVal);
             dayOfTheContract.setText(dayOfTheContractLabelText + dayofTheContractVal);
@@ -130,11 +135,18 @@ public class Controller {
             calculationType.setValue(val.get(0));
             // Finish
             isReaded = true;
+            calculationType.setDisable(false);
+            calculateButton.setDisable(false);
+            resultTable.setDisable(false);
         }
     }
 
     @FXML
     protected void onCalculateButton() throws Exception {
+        isCalculated = false;
+        for (int i = 0; i < resultTable.getItems().size(); i++) {
+            resultTable.getItems().clear();
+        }
         col1.setCellValueFactory(new PropertyValueFactory<>("N"));
         col2.setCellValueFactory(new PropertyValueFactory<>("dayOfUsing"));
         col3.setCellValueFactory(new PropertyValueFactory<>("paymentDateVal"));
@@ -147,27 +159,123 @@ public class Controller {
             return;
         }
         List<DataForTable> dataTemp = new ArrayList<DataForTable>();
-        PaymentBase paymentMethod = null;
+
         // Annuity payment
         if (calculationType.getValue() == val.get(0)) {
             paymentMethod = new AnnuityPayment(creditAmountVal, creditTermVal,
                     interestRateVal, paymentDateVal, dayofTheContractVal);
-            for (int i = 0; i < creditTermVal + 1; ++i) {
-                DataForTable tmp = null;
-                if (i == 0) {
-                    tmp = paymentMethod.getFirstMonthFee();
-                }
-                else {
-                    tmp = paymentMethod.getNotFirstMonthFee(i);
-                }
-                tmp.setN(i);
-                resultTable.getItems().add(tmp);
-                System.out.println("all good");
-            }
         }
         // Different payment
         else {
+            paymentMethod = new DifferentPayment(creditAmountVal, creditTermVal,
+                    interestRateVal, paymentDateVal, dayofTheContractVal);
+        }
+        XYChart.Series series = new XYChart.Series();
+        for (int i = 0; i < creditTermVal + 1; ++i) {
+            DataForTable tmp = null;
+            if (i == 0) {
+                tmp = paymentMethod.getFirstMonthFee();
+            } else {
+                tmp = paymentMethod.getNotFirstMonthFee(i);
+            }
+            tmp.setN(i);
+            series.getData().add(new XYChart.Data(Integer.toString(tmp.getN()),
+                    tmp.getFeeLeft()));
+            resultTable.getItems().add(tmp);
+        }
+        drawGraphicButton.setDisable(false);
+        saveInExcelButton.setDisable(false);
+        graphicLineChart.getData().clear();
+        graphicLineChart.getData().add(series);
+        isCalculated = true;
+    }
 
+    @FXML
+    protected void onDrawGraphicButton() {
+        resultTable.setVisible(!resultTable.isVisible());
+        graphicLineChart.setVisible(!graphicLineChart.isVisible());
+    }
+
+    @FXML
+    protected void onSaveInExcelButton() throws IOException {
+        if (!isCalculated) {
+            // TODO: send signal to info
+            return;
+        }
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Open File");
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
+                "Excel files (*.xlsx)", // TODO: ;*.xls
+                "*.xlsx"); // TODO: add supporting of , "*.xls"
+        chooser.getExtensionFilters().add(extFilter);
+        extFilter = new FileChooser.ExtensionFilter(
+                "Any files (*.*)",
+                "*.*");
+        chooser.getExtensionFilters().add(extFilter);
+        File file = chooser.showSaveDialog(new Stage());
+        if (file != null) {
+            file.createNewFile();
+            FileOutputStream out = new FileOutputStream(file);
+            XSSFWorkbook myWorkBook = new XSSFWorkbook();
+            myWorkBook.createSheet("ResultSheet");
+            Sheet resultSheet = myWorkBook.getSheet(myWorkBook.getSheetName(0));
+            for (int i = 0; i < 4; ++i) {
+                resultSheet.createRow(i);
+            }
+            Row row = resultSheet.getRow(0);
+            for (int i = 0; i < 6; ++i) {
+                row.createCell(i);
+            }
+            row.getCell(0).setCellValue("Сумма кредита");
+            row.getCell(1).setCellValue("Срок кредита");
+            row.getCell(2).setCellValue("Процентная ставка");
+            row.getCell(3).setCellValue("Дата платежа");
+            row.getCell(4).setCellValue("Кредит предоставляется заемщику");
+            row.getCell(5).setCellValue("Тип рассчёта");
+            row = resultSheet.getRow(1);
+
+            for (int i = 0; i < 6; ++i) {
+                row.createCell(i);
+            }
+            row.getCell(0).setCellValue(creditAmountVal);
+            row.getCell(1).setCellValue(creditTermVal);
+            row.getCell(2).setCellValue(interestRateVal);
+            row.getCell(3).setCellValue(paymentDateVal);
+            row.getCell(4).setCellValue(dayofTheContractVal);
+            row.getCell(5).setCellValue(paymentMethod.getPaymentType());
+            row = resultSheet.getRow(2);
+            for (int i = 0; i < 5; ++i) {
+                row.createCell(i);
+            }
+            row.getCell(0).setCellValue("n");
+            row.getCell(1).setCellValue("Кол-во дней пользования заемными средствами");
+            row.getCell(2).setCellValue("Дата платежа");
+            row.getCell(3).setCellValue("Общая сумма платежа");
+            row.getCell(4).setCellValue("В том числе");
+            row = resultSheet.getRow(3);
+            for (int i = 0; i < 7; ++i) {
+                row.createCell(i);
+            }
+            row.getCell(4).setCellValue("сумма процентов");
+            row.getCell(5).setCellValue("сумма погашаемого долга");
+            row.getCell(6).setCellValue("остаток задолжности");
+            for (int i = 0; i < resultTable.getItems().size(); ++i) {
+                resultSheet.createRow(i + 4);
+                row = resultSheet.getRow(resultSheet.getLastRowNum());
+                for (int j = 0; j < 7; ++j) {
+                    row.createCell(j);
+                }
+                var item = (DataForTable) resultTable.getItems().get(i);
+                row.getCell(0).setCellValue(item.getN());
+                row.getCell(1).setCellValue(item.getDayOfUsing());
+                row.getCell(2).setCellValue(item.getPaymentDateVal());
+                row.getCell(3).setCellValue(item.getGeneralPaymentSize());
+                row.getCell(4).setCellValue(item.getPercentSum());
+                row.getCell(5).setCellValue(item.getSumOfFee());
+                row.getCell(6).setCellValue(item.getFeeLeft());
+            }
+            myWorkBook.write(out);
+            out.close();
         }
     }
 }
