@@ -5,13 +5,21 @@ public abstract class PaymentBase
     protected double creditAmount;
     protected double creditTerm;
     protected double interestRate;
-    protected String paymentDate;
+    protected int paymentDate;
     protected String dayOfTheContract;
     protected double monthlyInterestRate;
+    protected double leftToPay;
     public abstract double getBasePayment();
     public abstract double getBalanceOwed();
     public abstract double getPercent();
     public abstract double getPayment();
     public abstract String getPaymentType();
-    public abstract double getFirstMonthFee();
+    public abstract DataForTable getFirstMonthFee();
+
+    public DataForTable getNotFirstMonthFee(int monthNumber) throws Exception {
+        if (monthNumber > creditTerm) {
+            throw new Exception("monthNumber has wrong value");
+        }
+        return null;
+    }
 }

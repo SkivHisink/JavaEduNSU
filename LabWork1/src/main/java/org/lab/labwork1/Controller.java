@@ -1,11 +1,14 @@
 package org.lab.labwork1;
 
+import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.apache.poi.ss.usermodel.Row;
@@ -19,13 +22,27 @@ import java.io.IOException;
 import java.util.*;
 
 public class Controller {
+    // Elements in UL
     @FXML
     private Label welcomeText;
     @FXML
     private TableView resultTable;
     @FXML
+    private TableColumn col1;
+    @FXML
+    private TableColumn col2;
+    @FXML
+    private TableColumn col3;
+    @FXML
+    private TableColumn col4;
+    @FXML
+    private TableColumn col5;
+    @FXML
+    private TableColumn col6;
+    @FXML
+    private TableColumn col7;
+    @FXML
     private ComboBox calculationType;
-    private String infoBegin = "INFO:";
     @FXML
     private Label infoText; // like a log for user
     private List<String> val;
@@ -45,14 +62,16 @@ public class Controller {
     private String dayOfTheContractLabelText = "Credit date:";
     @FXML
     private Label dayOfTheContract;
-//Data
+    //Data
     String dayofTheContractVal;
     int paymentDateVal;
     double interestRateVal;
     int creditTermVal;
     double creditAmountVal;
-// Additional
+    // Additional
+    private String infoBegin = "INFO:";
     boolean isReaded = false;
+
     @FXML
     protected void onHelloButtonClick() {
         //test button
@@ -96,14 +115,14 @@ public class Controller {
             }
             // getting data from file
             creditAmountVal = row.getCell(0).getNumericCellValue();
-            creditTermVal = (int)row.getCell(1).getNumericCellValue();
+            creditTermVal = (int) row.getCell(1).getNumericCellValue();
             interestRateVal = row.getCell(2).getNumericCellValue();
-            paymentDateVal = (int)row.getCell(3).getNumericCellValue();
+            paymentDateVal = (int) row.getCell(3).getNumericCellValue();
             dayofTheContractVal = row.getCell(4).getStringCellValue();
             // setting data to interface
-            creditAmount.setText(creditAmountLabelText + creditAmountVal+" month");
+            creditAmount.setText(creditAmountLabelText + creditAmountVal + " month");
             creditTerm.setText(creditTermLabelText + creditTermVal);
-            interestRate.setText(interestRateLabelText + interestRateVal+"%");
+            interestRate.setText(interestRateLabelText + interestRateVal + "%");
             paymentDate.setText(paymentDateLabelText + paymentDateVal);
             dayOfTheContract.setText(dayOfTheContractLabelText + dayofTheContractVal);
             //
@@ -115,18 +134,39 @@ public class Controller {
     }
 
     @FXML
-    protected void onCalculateButton()
-    {
-        if(!isReaded){
+    protected void onCalculateButton() throws Exception {
+        col1.setCellValueFactory(new PropertyValueFactory<>("N"));
+        col2.setCellValueFactory(new PropertyValueFactory<>("dayOfUsing"));
+        col3.setCellValueFactory(new PropertyValueFactory<>("paymentDateVal"));
+        col4.setCellValueFactory(new PropertyValueFactory<>("generalPaymentSize"));
+        col5.setCellValueFactory(new PropertyValueFactory<>("percentSum"));
+        col6.setCellValueFactory(new PropertyValueFactory<>("sumOfFee"));
+        col7.setCellValueFactory(new PropertyValueFactory<>("feeLeft"));
+        if (!isReaded) {
             // TODO: send signal to info
             return;
         }
+        List<DataForTable> dataTemp = new ArrayList<DataForTable>();
+        PaymentBase paymentMethod = null;
         // Annuity payment
-        if(calculationType.getValue()==val.get(0)){
-
+        if (calculationType.getValue() == val.get(0)) {
+            paymentMethod = new AnnuityPayment(creditAmountVal, creditTermVal,
+                    interestRateVal, paymentDateVal, dayofTheContractVal);
+            for (int i = 0; i < creditTermVal + 1; ++i) {
+                DataForTable tmp = null;
+                if (i == 0) {
+                    tmp = paymentMethod.getFirstMonthFee();
+                }
+                else {
+                    tmp = paymentMethod.getNotFirstMonthFee(i);
+                }
+                tmp.setN(i);
+                resultTable.getItems().add(tmp);
+                System.out.println("all good");
+            }
         }
         // Different payment
-        else{
+        else {
 
         }
     }

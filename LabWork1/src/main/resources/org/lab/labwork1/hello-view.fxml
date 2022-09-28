@@ -11,23 +11,23 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="530.0" prefWidth="720.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.lab.labwork1.Controller">
+<AnchorPane prefHeight="534.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.lab.labwork1.Controller">
    <children>
        <Button layoutX="486.0" layoutY="43.0" onAction="#onHelloButtonClick" text="Hello!" />
    
                                         <Label fx:id="welcomeText" layoutX="388.0" layoutY="78.0" prefHeight="34.0" prefWidth="292.0" textAlignment="JUSTIFY" />
       <Button layoutY="2.0" mnemonicParsing="false" onAction="#onOpenExcelButtonClick" text="Open init param" />
-      <TableView fx:id="resultTable" layoutX="4.0" layoutY="157.0" prefHeight="339.0" prefWidth="713.0">
+      <TableView fx:id="resultTable" layoutX="4.0" layoutY="157.0" prefHeight="339.0" prefWidth="589.0">
         <columns>
-          <TableColumn prefWidth="28.0" text="" />
-          <TableColumn prefWidth="104.0" text="Кол-во дней пользования заемными средствами" />
-            <TableColumn prefWidth="101.0" text="Дата платежа" />
-            <TableColumn prefWidth="151.0" text="Общая сумма платежа" />
+          <TableColumn fx:id="col1" prefWidth="28.0" text="n" />
+          <TableColumn fx:id="col2" prefWidth="104.0" text="Кол-во дней пользования заемными средствами" />
+            <TableColumn fx:id="col3" prefWidth="101.0" text="Дата платежа" />
+            <TableColumn fx:id="col4" prefWidth="151.0" text="Общая сумма платежа" />
             <TableColumn prefWidth="169.0" text="в том числе">
                <columns>
-                  <TableColumn prefWidth="64.0" text="сумма процентов" />
-                  <TableColumn prefWidth="64.0" text="сумма погашаемого долга" />
-                  <TableColumn prefWidth="64.0" text="остаток задолжности" />
+                  <TableColumn fx:id="col5" prefWidth="64.0" text="сумма процентов" />
+                  <TableColumn fx:id="col6" prefWidth="64.0" text="сумма погашаемого долга" />
+                  <TableColumn fx:id="col7" prefWidth="64.0" text="остаток задолжности" />
                </columns>
             </TableColumn>
         </columns>
@@ -41,7 +41,7 @@
          </font>
       </Label>
       <Button layoutX="163.0" layoutY="30.0" mnemonicParsing="false" onAction="#onCalculateButton" text="Calculate" />
-      <LineChart layoutY="157.0" prefHeight="339.0" prefWidth="720.0" visible="false">
+      <LineChart layoutY="157.0" prefHeight="339.0" prefWidth="589.0" visible="false">
         <xAxis>
           <CategoryAxis side="BOTTOM" />
         </xAxis>
