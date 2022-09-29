@@ -4,6 +4,10 @@ import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
@@ -69,16 +73,38 @@ public class Controller {
     @FXML
     private LineChart graphicLineChart;
     //Data
-    String dayofTheContractVal;
-    int paymentDateVal;
-    double interestRateVal;
-    int creditTermVal;
-    double creditAmountVal;
+    private String dayofTheContractVal;
+    private int paymentDateVal;
+    private double interestRateVal;
+    private int creditTermVal;
+    private double creditAmountVal;
     // Additional
     private String infoBegin = "INFO:";
-    boolean isReaded = false;
-    boolean isCalculated = false;
-    PaymentBase paymentMethod = null;
+    private boolean isReaded = false;
+    private boolean isCalculated = false;
+    private PaymentBase paymentMethod = null;
+    private Stage helpStage;
+    private boolean isRuLang = true;
+    @FXML
+    private TextArea readmeTextArea;
+    String readmeRuText = "Для использования данной программы вам необходимо проделать следующие шаги:\n" +
+            "1) Создать файл формата \"*.xlsx\";\n" +
+            "2) На первом листе на второй строке разместить входные данные в общем формате ячеек где | - новая ячейка:\n" +
+            "Сумма кредита(численное значение)|Срок кредита(целое численное значение)|Процентная ставка(численное значение)|Дата платежа(целое численное значение)| " +
+            "Кредит предоставляется заемщику(дата через точку). Пример данных:\n" +
+            "\"9200000|276|7.45|25|22.09.2022\". В результате должна получится строка с 5-ю заполненными ячейками;\n" +
+            "3) Загрузите ваш файл с помощью кнопки \"Open init param\";\n" +
+            "4) Выберите тип расчёта и нажмите кнопку \"Calculate\";\n" +
+            "5) При необходимости вы можете посмотреть график или сохранить результаты при помощи кнопок \"Draw graphic\" и \"Save in Excel\" соответственно.";
+    String readmeEnText = "To use this program, you need to do the following steps:\n" +
+            "1) Create a file of \"*.xlsx\" format;\n" +
+            "2) On the first sheet on the second line, place the input data in the general format of cells where | - new cell:\n" +
+            "Credit amount(numerical value)|Credit term(integer numerical value)|Interest rate(numerical value)|Payment date(integer numerical value)| \n" +
+            "The credit is provided to the borrower (date separated by a dot).Sample data:\"9200000|276|7.45|25|22.09.2022\".\n" +
+            "The result should be a line with 5 filled cells;\n" +
+            "3) Upload your file using the \"Open init param\" button;\n" +
+            "4) Select the calculation type and click the \"Calculate\" button;\n" +
+            "5) If necessary, you can view the graph or save the results using the \"Draw graphic\" and \"Save in Excel\" buttons, respectively.";
 
     public Controller() {
         //Generating payment types
@@ -107,11 +133,11 @@ public class Controller {
             Sheet sheet = xssfWorkbook.getSheet(xssfWorkbook.getSheetName(0));
             Row row = sheet.getRow(1);
             if (row == null) {
-                // TODO: write something in INFO
+                infoText.setText(infoBegin + "Init data is incorrect.");
                 return;
             }
             if (row.getCell(4) == null) {
-                // TODO: write something in INFO
+                infoText.setText(infoBegin + "Init data is incorrect.");
                 return;
             }
             // getting data from file
@@ -120,7 +146,7 @@ public class Controller {
             interestRateVal = row.getCell(2).getNumericCellValue();
             paymentDateVal = (int) row.getCell(3).getNumericCellValue();
             dayofTheContractVal = row.getCell(4).getStringCellValue();
-            if(paymentDateVal>28){
+            if (paymentDateVal > 28) {
                 infoText.setText(infoBegin + "Payment date must be less or equal to 28.");
                 return;
             }
@@ -134,10 +160,12 @@ public class Controller {
             calculationType.setItems(observableList);
             calculationType.setValue(val.get(0));
             // Finish
+
             isReaded = true;
             calculationType.setDisable(false);
             calculateButton.setDisable(false);
             resultTable.setDisable(false);
+            infoText.setText(infoBegin + "File read successful.");
         }
     }
 
@@ -154,10 +182,12 @@ public class Controller {
         col5.setCellValueFactory(new PropertyValueFactory<>("percentSum"));
         col6.setCellValueFactory(new PropertyValueFactory<>("sumOfFee"));
         col7.setCellValueFactory(new PropertyValueFactory<>("feeLeft"));
+        // Legacy code
         if (!isReaded) {
-            // TODO: send signal to info
+            infoText.setText(infoBegin + "Read init file first.");
             return;
         }
+        // end of legacy code
         List<DataForTable> dataTemp = new ArrayList<DataForTable>();
 
         // Annuity payment
@@ -188,12 +218,47 @@ public class Controller {
         graphicLineChart.getData().clear();
         graphicLineChart.getData().add(series);
         isCalculated = true;
+        infoText.setText(infoBegin + "Calculated.");
     }
 
     @FXML
     protected void onDrawGraphicButton() {
         resultTable.setVisible(!resultTable.isVisible());
         graphicLineChart.setVisible(!graphicLineChart.isVisible());
+    }
+
+    @FXML
+    protected void onHelpButton() {
+        try {
+            if (helpStage == null || !helpStage.isShowing()) {
+                FXMLLoader fxmlLoader = new FXMLLoader();
+                fxmlLoader.setLocation(getClass().getResource("readme.fxml"));
+                Scene scene = new Scene(fxmlLoader.load());
+                helpStage = new Stage();
+                helpStage.setTitle("Readme");
+                helpStage.setScene(scene);
+                helpStage.setResizable(false);
+                helpStage.show();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    protected void onRuLangButton() {
+        if (!isRuLang) {
+            readmeTextArea.setText(readmeRuText);
+            isRuLang = !isRuLang;
+        }
+    }
+
+    @FXML
+    protected void onEnLangButton() {
+        if (isRuLang) {
+            readmeTextArea.setText(readmeEnText);
+            isRuLang = !isRuLang;
+        }
     }
 
     @FXML
@@ -208,10 +273,6 @@ public class Controller {
                 "Excel files (*.xlsx)", // TODO: ;*.xls
                 "*.xlsx"); // TODO: add supporting of , "*.xls"
         chooser.getExtensionFilters().add(extFilter);
-        extFilter = new FileChooser.ExtensionFilter(
-                "Any files (*.*)",
-                "*.*");
-        chooser.getExtensionFilters().add(extFilter);
         File file = chooser.showSaveDialog(new Stage());
         if (file != null) {
             file.createNewFile();
@@ -223,6 +284,7 @@ public class Controller {
                 resultSheet.createRow(i);
             }
             Row row = resultSheet.getRow(0);
+            // TODO: Solve this strange thing
             for (int i = 0; i < 6; ++i) {
                 row.createCell(i);
             }
@@ -233,7 +295,7 @@ public class Controller {
             row.getCell(4).setCellValue("Кредит предоставляется заемщику");
             row.getCell(5).setCellValue("Тип рассчёта");
             row = resultSheet.getRow(1);
-
+            // TODO: Solve this strange thing
             for (int i = 0; i < 6; ++i) {
                 row.createCell(i);
             }
@@ -244,6 +306,7 @@ public class Controller {
             row.getCell(4).setCellValue(dayofTheContractVal);
             row.getCell(5).setCellValue(paymentMethod.getPaymentType());
             row = resultSheet.getRow(2);
+            // TODO: Solve this strange thing
             for (int i = 0; i < 5; ++i) {
                 row.createCell(i);
             }
@@ -253,6 +316,7 @@ public class Controller {
             row.getCell(3).setCellValue("Общая сумма платежа");
             row.getCell(4).setCellValue("В том числе");
             row = resultSheet.getRow(3);
+            // TODO: Solve this strange thing
             for (int i = 0; i < 7; ++i) {
                 row.createCell(i);
             }
@@ -262,6 +326,7 @@ public class Controller {
             for (int i = 0; i < resultTable.getItems().size(); ++i) {
                 resultSheet.createRow(i + 4);
                 row = resultSheet.getRow(resultSheet.getLastRowNum());
+                // TODO: Solve this strange thing
                 for (int j = 0; j < 7; ++j) {
                     row.createCell(j);
                 }
@@ -276,6 +341,7 @@ public class Controller {
             }
             myWorkBook.write(out);
             out.close();
+            infoText.setText(infoBegin + "File saved successful.");
         }
     }
 }

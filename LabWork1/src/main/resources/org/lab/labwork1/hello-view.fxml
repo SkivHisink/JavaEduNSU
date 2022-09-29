@@ -32,7 +32,7 @@
         </columns>
       </TableView>
       <ComboBox fx:id="calculationType" disable="true" layoutX="7.0" layoutY="30.0" prefWidth="150.0" />
-      <Button fx:id="saveInExcelButton" onAction="#onSaveInExcelButton" disable="true" layoutX="103.0" layoutY="2.0" mnemonicParsing="false" text="Save in Excel" />
+      <Button fx:id="saveInExcelButton" disable="true" layoutX="103.0" layoutY="2.0" mnemonicParsing="false" onAction="#onSaveInExcelButton" text="Save in Excel" />
       <Button fx:id="drawGraphicButton" disable="true" layoutX="301.0" layoutY="30.0" mnemonicParsing="false" onAction="#onDrawGraphicButton" text="Draw graphic" />
       <Label fx:id="creditAmount" layoutX="9.0" layoutY="55.0" text="Credit amount:">
          <font>
@@ -73,5 +73,6 @@
             <Font size="14.0" />
          </font>
       </Label>
+      <Button onAction="#onHelpButton" layoutX="675.0" layoutY="2.0" mnemonicParsing="false" text="Help" />
    </children>
 </AnchorPane>
