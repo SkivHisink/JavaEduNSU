@@ -9,10 +9,6 @@ public abstract class PaymentBase
     protected String dayOfTheContract;
     protected double monthlyInterestRate;
     protected double leftToPay;
-    public abstract double getBasePayment();
-    public abstract double getBalanceOwed();
-    public abstract double getPercent();
-    public abstract double getPayment();
     public abstract String getPaymentType();
     public abstract DataForTable getFirstMonthFee();
 

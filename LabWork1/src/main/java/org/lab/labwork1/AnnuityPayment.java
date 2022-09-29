@@ -1,11 +1,5 @@
 package org.lab.labwork1;
-
-import java.time.*;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-
-public class AnnuityPayment extends LabTaskPaymentBase {
+public final class AnnuityPayment extends LabTaskPaymentBase {
     protected double annuityCoef;
     protected double annuityFee;
 
@@ -17,26 +11,6 @@ public class AnnuityPayment extends LabTaskPaymentBase {
         annuityCoef = monthlyInterestRate * tempVar / (tempVar - 1);
         annuityFee = annuityCoef * creditAmount;
         annuityFee = (double)(Math.round( annuityFee * 100))/100;
-    }
-
-    @Override
-    public double getBasePayment() {
-        return 0;
-    }
-
-    @Override
-    public double getBalanceOwed() {
-        return 0;
-    }
-
-    @Override
-    public double getPercent() {
-        return 0;
-    }
-
-    @Override
-    public double getPayment() {
-        return 0;
     }
 
     @Override
