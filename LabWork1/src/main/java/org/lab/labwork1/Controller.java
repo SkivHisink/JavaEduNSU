@@ -295,7 +295,7 @@ public class Controller {
             row.getCell(2).setCellValue("Процентная ставка");
             row.getCell(3).setCellValue("Дата платежа");
             row.getCell(4).setCellValue("Кредит предоставляется заемщику");
-            row.getCell(5).setCellValue("Тип рассчёта");
+            row.getCell(5).setCellValue("Тип расчета");
             row = resultSheet.getRow(1);
             // TODO: Solve this strange thing
             for (int i = 0; i < 6; ++i) {
