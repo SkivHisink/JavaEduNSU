@@ -14,8 +14,11 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ooxml.POIXMLDocument;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -113,14 +116,37 @@ public class Controller {
         val.add("Different payment");
         observableList = FXCollections.observableList(val);
     }
-
+    protected boolean readWorkbook(Workbook workBook)
+    {
+        Sheet sheet = workBook.getSheet(workBook.getSheetName(0));
+        Row row = sheet.getRow(1);
+        if (row == null) {
+            infoText.setText(infoBegin + "Init data is incorrect.");
+            return false;
+        }
+        if (row.getCell(4) == null) {
+            infoText.setText(infoBegin + "Init data is incorrect.");
+            return false;
+        }
+        // getting data from file
+        creditAmountVal = row.getCell(0).getNumericCellValue();
+        creditTermVal = (int) row.getCell(1).getNumericCellValue();
+        interestRateVal = row.getCell(2).getNumericCellValue();
+        paymentDateVal = (int) row.getCell(3).getNumericCellValue();
+        dayofTheContractVal = row.getCell(4).getStringCellValue();
+        if (paymentDateVal > 28) {
+            infoText.setText(infoBegin + "Payment date must be less or equal to 28.");
+            return false;
+        }
+        return true;
+    }
     @FXML
     protected void onOpenExcelButtonClick() throws IOException {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Open File");
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
-                "Excel files (*.xlsx)", // TODO: ;*.xls
-                "*.xlsx"); // TODO: add supporting of , "*.xls"
+                "Excel files (*.xlsx;*.xls)",
+                "*.xlsx", "*.xls");
         chooser.getExtensionFilters().add(extFilter);
         extFilter = new FileChooser.ExtensionFilter(
                 "Any files (*.*)",
@@ -135,27 +161,23 @@ public class Controller {
                 infoText.setText(infoBegin + e.getMessage());
                 return;
             }
-            XSSFWorkbook xssfWorkbook = new XSSFWorkbook(fileInputStream);
-            Sheet sheet = xssfWorkbook.getSheet(xssfWorkbook.getSheetName(0));
-            Row row = sheet.getRow(1);
-            if (row == null) {
-                infoText.setText(infoBegin + "Init data is incorrect.");
+            String extension = "";
+            int i = file.getPath().lastIndexOf('.');
+            if (i > 0) {
+                extension = file.getPath().substring(i+1);
+            }
+            Workbook workBook = null;
+            if(extension.equals("xlsx")) {
+                workBook = new XSSFWorkbook(fileInputStream);
+            }
+            else if(extension.equals("xls")){
+                workBook = new HSSFWorkbook(fileInputStream);
+            }
+            else{
+                infoText.setText(infoBegin + "Can't parse this type of file.");
                 return;
             }
-            if (row.getCell(4) == null) {
-                infoText.setText(infoBegin + "Init data is incorrect.");
-                return;
-            }
-            // getting data from file
-            creditAmountVal = row.getCell(0).getNumericCellValue();
-            creditTermVal = (int) row.getCell(1).getNumericCellValue();
-            interestRateVal = row.getCell(2).getNumericCellValue();
-            paymentDateVal = (int) row.getCell(3).getNumericCellValue();
-            dayofTheContractVal = row.getCell(4).getStringCellValue();
-            if (paymentDateVal > 28) {
-                infoText.setText(infoBegin + "Payment date must be less or equal to 28.");
-                return;
-            }
+            readWorkbook(workBook);
             // setting data to interface
             creditAmount.setText(creditAmountLabelText + creditAmountVal + "₽");
             creditTerm.setText(creditTermLabelText + creditTermVal + " month");
