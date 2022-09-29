@@ -25,4 +25,8 @@ public class Utility {
     {
         return (double) (Math.round(val * 100)) / 100;
     }
+
+    public static String monthFormatFixer(int month){
+        return (month>=10)?(""+month):("0"+month);
+    }
 }

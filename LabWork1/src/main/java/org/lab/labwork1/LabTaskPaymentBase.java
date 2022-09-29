@@ -51,9 +51,9 @@ public class LabTaskPaymentBase extends  PaymentBase{
             if (beginMonth == 0)
                 beginMonth = 12;
         }
-        result.setPaymentDateVal(paymentDate + "." + (beginMonth) + "." + beginYear); // 2
+        result.setPaymentDateVal(paymentDate + "." + Utility.monthFormatFixer(beginMonth) + "." + beginYear); // 2
         result.setDayOfUsing(Utility.getDaysBetweenTwoDates(dayOfTheContract,
-                paymentDate + "." + ((beginMonth>=10)?beginMonth:("0"+beginMonth)) +
+                paymentDate + "." + Utility.monthFormatFixer(beginMonth) +
                         "." + beginYear)); // 1
     }
     @Override
@@ -83,7 +83,7 @@ public class LabTaskPaymentBase extends  PaymentBase{
             result.setDayOfUsing(daysInMonth - beginDate + 1 + endDate); // 1
             beginMonth += 1;
         }
-        result.setPaymentDateVal(paymentDate + "." + (beginMonth) + "." + beginYear); // 2
+        result.setPaymentDateVal(paymentDate + "." + Utility.monthFormatFixer(beginMonth) + "." + beginYear); // 2
         result.setFeeLeft(this.creditAmount); // 6
         result.setGeneralPaymentSize(Utility.bankingRound(result.getPercentSum() + result.getSumOfFee())); // 3
         leftToPay = this.creditAmount;

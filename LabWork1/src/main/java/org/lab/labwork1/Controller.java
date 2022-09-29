@@ -128,7 +128,13 @@ public class Controller {
         chooser.getExtensionFilters().add(extFilter);
         File file = chooser.showOpenDialog(new Stage());
         if (file != null) {
-            FileInputStream fileInputStream = new FileInputStream(file.getPath());
+            FileInputStream fileInputStream = null;
+            try {
+                fileInputStream = new FileInputStream(file.getPath());
+            } catch (FileNotFoundException e) {
+                infoText.setText(infoBegin + e.getMessage());
+                return;
+            }
             XSSFWorkbook xssfWorkbook = new XSSFWorkbook(fileInputStream);
             Sheet sheet = xssfWorkbook.getSheet(xssfWorkbook.getSheetName(0));
             Row row = sheet.getRow(1);
@@ -277,8 +283,14 @@ public class Controller {
         chooser.getExtensionFilters().add(extFilter);
         File file = chooser.showSaveDialog(new Stage());
         if (file != null) {
-            file.createNewFile();
-            FileOutputStream out = new FileOutputStream(file);
+            FileOutputStream out = null;
+            try {
+                file.createNewFile();
+                out = new FileOutputStream(file);
+            } catch (FileNotFoundException e) {
+                infoText.setText(infoBegin + e.getMessage());
+                return;
+            }
             XSSFWorkbook myWorkBook = new XSSFWorkbook();
             myWorkBook.createSheet("ResultSheet");
             Sheet resultSheet = myWorkBook.getSheet(myWorkBook.getSheetName(0));
