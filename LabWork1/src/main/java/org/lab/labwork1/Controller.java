@@ -217,6 +217,8 @@ public class Controller {
         saveInExcelButton.setDisable(false);
         graphicLineChart.getData().clear();
         graphicLineChart.getData().add(series);
+        series.setName("results");
+        //graphicLineChart.setTitle("results");
         isCalculated = true;
         infoText.setText(infoBegin + "Calculated.");
     }
