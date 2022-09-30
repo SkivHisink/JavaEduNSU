@@ -72,20 +72,20 @@
          </font>
       </Label>
       <Button layoutX="675.0" layoutY="2.0" mnemonicParsing="false" onAction="#onHelpButton" text="Help" />
-      <ComboBox fx:id="xDataType" disable="true" layoutX="388.0" layoutY="59.0" prefWidth="150.0" promptText="select x data" />
-      <ComboBox fx:id="yDataType" disable="true" layoutX="388.0" layoutY="91.0" prefWidth="150.0" promptText="select y data" />
-      <Label disable="true" layoutX="348.0" layoutY="96.0" text="Y data">
+      <ComboBox disable="true" layoutX="388.0" layoutY="59.0" prefHeight="25.0" prefWidth="235.0" promptText="select x data" fx:id="xDataType" />
+      <ComboBox fx:id="yDataType" disable="true" layoutX="388.0" layoutY="91.0" prefHeight="25.0" prefWidth="235.0" promptText="select y data" />
+      <Label layoutX="348.0" layoutY="96.0" text="Y data">
          <font>
             <Font name="Times New Roman" size="14.0" />
          </font>
       </Label>
-      <Label disable="true" layoutX="348.0" layoutY="64.0" text="X data">
+      <Label layoutX="348.0" layoutY="64.0" text="X data">
          <font>
             <Font name="Times New Roman" size="14.0" />
          </font>
       </Label>
-      <Button fx:id="addGraphicButton" onAction="#onAddGraphicButton" disable="true" layoutX="388.0" layoutY="30.0" mnemonicParsing="false" text="Add graphic" />
-      <Button disable="true" layoutX="388.0" layoutY="123.0" mnemonicParsing="false" text="Delete graphic" />
-      <ComboBox disable="true" layoutX="238.0" layoutY="123.0" prefWidth="150.0" />
+      <Button fx:id="addGraphicButton" disable="true" layoutX="388.0" layoutY="30.0" mnemonicParsing="false" onAction="#onAddGraphicButton" text="Add graphic" />
+      <Button fx:id="deleteGraphicButton" onAction="#onDeleteGraphicButton" disable="true" layoutX="388.0" layoutY="123.0" mnemonicParsing="false" text="Delete graphic" />
+      <ComboBox fx:id="graphicComboBox" disable="true" layoutX="238.0" layoutY="123.0" prefWidth="150.0" />
    </children>
 </AnchorPane>

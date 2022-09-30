@@ -83,7 +83,14 @@ public class Controller {
     private TextArea readmeTextArea;
     @FXML
     private Button addGraphicButton;
+    @FXML
+    private Button deleteGraphicButton;
+    @FXML
+    private ComboBox graphicComboBox;
     Map<String, XYChart.Series> graphicsContainer;
+    private List<String> graphicNamesList;
+    int counterGraph = 0;
+
     public Controller() {
         //Generating payment types
         val = new ArrayList<String>();
@@ -101,6 +108,7 @@ public class Controller {
         xyObservableList = FXCollections.observableList(xyDataTypeNames);
         reader = new initParamReader();
         graphicsContainer = new HashMap<>();
+        graphicNamesList = new ArrayList<>();
     }
 
 
@@ -203,7 +211,6 @@ public class Controller {
                     reader.getPaymentDateVal(),
                     reader.getDayofTheContractVal());
         }
-        XYChart.Series series = new XYChart.Series();
         for (int i = 0; i < reader.getCreditTermVal() + 1; ++i) {
             DataForTable tmp = null;
             if (i == 0) {
@@ -212,32 +219,90 @@ public class Controller {
                 tmp = paymentMethod.getNotFirstMonthFee(i);
             }
             tmp.setN(i);
-            series.getData().add(new XYChart.Data(Integer.toString(tmp.getN()),
-                    tmp.getFeeLeft()));
             resultTable.getItems().add(tmp);
         }
         drawGraphicButton.setDisable(false);
         saveInExcelButton.setDisable(false);
-        graphicLineChart.getData().clear();
-        graphicLineChart.getData().add(series);
-        series.setName("results");
-        //graphicLineChart.setTitle("results");
         isCalculated = true;
         infoText.setText(Utility.InfoBegin + "Calculated.");
     }
 
+    private List<String> getData(String type) {
+        List<String> result = new ArrayList<>();
+        if (type == xyDataTypeNames.get(0)) {
+            for (int i = 0; i < reader.getCreditTermVal() + 1; ++i) {
+                DataForTable tmp = (DataForTable) resultTable.getItems().get(i);
+                result.add(Integer.toString(tmp.getN()));
+            }
+        } else if (type == xyDataTypeNames.get(1)) {
+            for (int i = 0; i < reader.getCreditTermVal() + 1; ++i) {
+                DataForTable tmp = (DataForTable) resultTable.getItems().get(i);
+                result.add(Integer.toString(tmp.getDayOfUsing()));
+            }
+
+        } else if (type == xyDataTypeNames.get(2)) {
+            for (int i = 0; i < reader.getCreditTermVal() + 1; ++i) {
+                DataForTable tmp = (DataForTable) resultTable.getItems().get(i);
+                result.add(tmp.getPaymentDateVal());
+            }
+        } else if (type == xyDataTypeNames.get(3)) {
+            for (int i = 0; i < reader.getCreditTermVal() + 1; ++i) {
+                DataForTable tmp = (DataForTable) resultTable.getItems().get(i);
+                result.add(Double.toString(tmp.getGeneralPaymentSize()));
+            }
+        } else if (type == xyDataTypeNames.get(4)) {
+            for (int i = 0; i < reader.getCreditTermVal() + 1; ++i) {
+                DataForTable tmp = (DataForTable) resultTable.getItems().get(i);
+                result.add(Double.toString(tmp.getPercentSum()));
+            }
+        } else if (type == xyDataTypeNames.get(5)) {
+            for (int i = 0; i < reader.getCreditTermVal() + 1; ++i) {
+                DataForTable tmp = (DataForTable) resultTable.getItems().get(i);
+                result.add(Double.toString(tmp.getSumOfFee()));
+            }
+        } else if (type == xyDataTypeNames.get(6)) {
+            for (int i = 0; i < reader.getCreditTermVal() + 1; ++i) {
+                DataForTable tmp = (DataForTable) resultTable.getItems().get(i);
+                result.add(Double.toString(tmp.getFeeLeft()));
+            }
+        } else {
+        }
+        return result;
+    }
+
     @FXML
     protected void onAddGraphicButton() {
-
+        var xData = getData((String) xDataType.getValue());
+        var yData = getData((String) yDataType.getValue());
+        try {
+            XYChart.Series series = new XYChart.Series();
+            for (int i = 0; i < xData.size(); ++i) {
+                series.getData().add(new XYChart.Data(xData.get(i), Double.parseDouble(yData.get(i))));
+            }
+            series.setName("graphic_" + counterGraph);
+            graphicNamesList.add(series.getName());
+            graphicsContainer.put(Integer.toString(counterGraph), series); // Are we need it?!
+            counterGraph++;
+            graphicLineChart.getData().add(series);
+            var tempObsList = FXCollections.observableList(graphicNamesList);
+            graphicComboBox.getItems().clear();
+            graphicComboBox.setItems(tempObsList);
+        }
+        catch(Exception e)
+        {
+            //TODO: delete try-catch block
+        }
     }
 
     @FXML
     protected void onDrawGraphicButton() {
         resultTable.setVisible(!resultTable.isVisible());
         graphicLineChart.setVisible(!graphicLineChart.isVisible());
-        // xDataType.setDisable(!xDataType.isDisabled());
-        //  yDataType.setDisable(!yDataType.isDisabled());
-        //  addGraphicButton.setDisable(!addGraphicButton.isDisabled());
+        xDataType.setDisable(!xDataType.isDisabled());
+        yDataType.setDisable(!yDataType.isDisabled());
+        addGraphicButton.setDisable(!addGraphicButton.isDisabled());
+        deleteGraphicButton.setDisable(!deleteGraphicButton.isDisabled());
+        graphicComboBox.setDisable(!graphicComboBox.isDisabled());
     }
 
     @FXML
@@ -363,5 +428,10 @@ public class Controller {
             out.close();
             infoText.setText(Utility.InfoBegin + "File saved successful.");
         }
+    }
+
+    @FXML
+    protected void onDeleteGraphicButton() {
+        //TODO:Add delete button
     }
 }
