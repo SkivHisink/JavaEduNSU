@@ -4,7 +4,7 @@ import java.time.YearMonth;
 
 public class LabTaskPaymentBase extends  PaymentBase{
 
-    public LabTaskPaymentBase(double creditAmount_, double creditTerm_,
+    public LabTaskPaymentBase(double creditAmount_, int creditTerm_,
                           double interestRate_, int paymentDate_,
                           String dayOfTheContract_) {
         creditAmount = creditAmount_;
@@ -14,26 +14,6 @@ public class LabTaskPaymentBase extends  PaymentBase{
         dayOfTheContract = dayOfTheContract_;
         monthlyInterestRate = interestRate / 12 / 100;
         var tempVar = Math.pow(1 + monthlyInterestRate, creditTerm);
-    }
-
-    @Override
-    public double getBasePayment() {
-        return 0;
-    }
-
-    @Override
-    public double getBalanceOwed() {
-        return 0;
-    }
-
-    @Override
-    public double getPercent() {
-        return 0;
-    }
-
-    @Override
-    public double getPayment() {
-        return 0;
     }
 
     @Override

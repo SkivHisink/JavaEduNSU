@@ -3,7 +3,7 @@ public final class AnnuityPayment extends LabTaskPaymentBase {
     protected double annuityCoef;
     protected double annuityFee;
 
-    public AnnuityPayment(double creditAmount_, double creditTerm_,
+    public AnnuityPayment(double creditAmount_, int creditTerm_,
                           double interestRate_, int paymentDate_,
                           String dayOfTheContract_) {
         super(creditAmount_, creditTerm_, interestRate_, paymentDate_, dayOfTheContract_);

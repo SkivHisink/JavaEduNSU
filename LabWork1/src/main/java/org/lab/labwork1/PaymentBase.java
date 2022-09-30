@@ -1,12 +1,7 @@
 package org.lab.labwork1;
 
-public abstract class PaymentBase
+public abstract class PaymentBase extends InitParamBase
 {
-    protected double creditAmount;
-    protected double creditTerm;
-    protected double interestRate;
-    protected int paymentDate;
-    protected String dayOfTheContract;
     protected double monthlyInterestRate;
     protected double leftToPay;
     public abstract String getPaymentType();

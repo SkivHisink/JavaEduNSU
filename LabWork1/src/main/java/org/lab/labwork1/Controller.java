@@ -23,8 +23,6 @@ import java.util.*;
 public class Controller {
     // Elements in UI
     @FXML
-    private Label welcomeText;
-    @FXML
     private TableView resultTable;
     @FXML
     private TableColumn col1;
@@ -43,6 +41,12 @@ public class Controller {
     @FXML
     private ComboBox calculationType;
     @FXML
+    private ComboBox xDataType;
+    @FXML
+    private ComboBox yDataType;
+    @FXML
+    private ComboBox deleteGraphicNames;
+    @FXML
     private Button saveInExcelButton;
     @FXML
     private Button calculateButton;
@@ -51,14 +55,13 @@ public class Controller {
     @FXML
     private Label infoText; // like a log for user
     private List<String> val;
+    private List<String> xyDataTypeNames;
     private ObservableList<String> observableList;
-    private String creditAmountLabelText = "Credit amount:";
+    private ObservableList<String> xyObservableList;
     @FXML
     private Label creditAmount;
-    private String creditTermLabelText = "Credit term:";
     @FXML
     private Label creditTerm;
-    private String interestRateLabelText = "Interest rate:";
     @FXML
     private Label interestRate;
     private String paymentDateLabelText = "Payment date:";
@@ -70,70 +73,37 @@ public class Controller {
     @FXML
     private LineChart graphicLineChart;
     //Data
-    private String dayofTheContractVal;
-    private int paymentDateVal;
-    private double interestRateVal;
-    private int creditTermVal;
-    private double creditAmountVal;
+    private initParamReader reader;
     // Additional
-    private String infoBegin = "INFO:";
-    private boolean isReaded = false;
     private boolean isCalculated = false;
     private PaymentBase paymentMethod = null;
     private Stage helpStage;
     private boolean isRuLang = true;
     @FXML
     private TextArea readmeTextArea;
-    String readmeRuText = "Для использования данной программы вам необходимо проделать следующие шаги:\n" +
-            "1) Создать файл формата \"*.xlsx\";\n" +
-            "2) На первом листе на второй строке разместить входные данные в общем формате ячеек где | - новая ячейка:\n" +
-            "Сумма кредита(численное значение)|Срок кредита(целое численное значение)|Процентная ставка(численное значение)|Дата платежа(целое численное значение)| " +
-            "Кредит предоставляется заемщику(дата через точку). Пример данных:\n" +
-            "\"9200000|276|7.45|25|22.09.2022\". В результате должна получится строка с 5-ю заполненными ячейками;\n" +
-            "3) Загрузите ваш файл с помощью кнопки \"Open init param\";\n" +
-            "4) Выберите тип расчёта и нажмите кнопку \"Calculate\";\n" +
-            "5) При необходимости вы можете посмотреть график или сохранить результаты при помощи кнопок \"Draw graphic\" и \"Save in Excel\" соответственно.";
-    String readmeEnText = "To use this program, you need to do the following steps:\n" +
-            "1) Create a file of \"*.xlsx\" format;\n" +
-            "2) On the first sheet on the second line, place the input data in the general format of cells where | - new cell:\n" +
-            "Credit amount(numerical value)|Credit term(integer numerical value)|Interest rate(numerical value)|Payment date(integer numerical value)| \n" +
-            "The credit is provided to the borrower (date separated by a dot).Sample data:\"9200000|276|7.45|25|22.09.2022\".\n" +
-            "The result should be a line with 5 filled cells;\n" +
-            "3) Upload your file using the \"Open init param\" button;\n" +
-            "4) Select the calculation type and click the \"Calculate\" button;\n" +
-            "5) If necessary, you can view the graph or save the results using the \"Draw graphic\" and \"Save in Excel\" buttons, respectively.";
-
+    @FXML
+    private Button addGraphicButton;
+    Map<String, XYChart.Series> graphicsContainer;
     public Controller() {
         //Generating payment types
         val = new ArrayList<String>();
         val.add("Annuity payment");
         val.add("Different payment");
+        xyDataTypeNames = new ArrayList<String>();
+        xyDataTypeNames.add("N");
+        xyDataTypeNames.add("Кол-во дней пользования заемными средствами");
+        xyDataTypeNames.add("Дата платежа");
+        xyDataTypeNames.add("Общая сумма платежа");
+        xyDataTypeNames.add("Сумма процентов");
+        xyDataTypeNames.add("Сумма погашаемого долга");
+        xyDataTypeNames.add("Остаток задолжности");
         observableList = FXCollections.observableList(val);
+        xyObservableList = FXCollections.observableList(xyDataTypeNames);
+        reader = new initParamReader();
+        graphicsContainer = new HashMap<>();
     }
-    protected boolean readWorkbook(Workbook workBook)
-    {
-        Sheet sheet = workBook.getSheet(workBook.getSheetName(0));
-        Row row = sheet.getRow(1);
-        if (row == null) {
-            infoText.setText(infoBegin + "Init data is incorrect.");
-            return false;
-        }
-        if (row.getCell(4) == null) {
-            infoText.setText(infoBegin + "Init data is incorrect.");
-            return false;
-        }
-        // getting data from file
-        creditAmountVal = row.getCell(0).getNumericCellValue();
-        creditTermVal = (int) row.getCell(1).getNumericCellValue();
-        interestRateVal = row.getCell(2).getNumericCellValue();
-        paymentDateVal = (int) row.getCell(3).getNumericCellValue();
-        dayofTheContractVal = row.getCell(4).getStringCellValue();
-        if (paymentDateVal > 28) {
-            infoText.setText(infoBegin + "Payment date must be less or equal to 28.");
-            return false;
-        }
-        return true;
-    }
+
+
     @FXML
     protected void onOpenExcelButtonClick() throws IOException {
         FileChooser chooser = new FileChooser();
@@ -152,42 +122,45 @@ public class Controller {
             try {
                 fileInputStream = new FileInputStream(file.getPath());
             } catch (FileNotFoundException e) {
-                infoText.setText(infoBegin + e.getMessage());
+                infoText.setText(Utility.InfoBegin + e.getMessage());
                 return;
             }
             String extension = "";
             int i = file.getPath().lastIndexOf('.');
             if (i > 0) {
-                extension = file.getPath().substring(i+1);
+                extension = file.getPath().substring(i + 1);
             }
             Workbook workBook = null;
-            if(extension.equals("xlsx")) {
+            if (extension.equals("xlsx")) {
                 workBook = new XSSFWorkbook(fileInputStream);
-            }
-            else if(extension.equals("xls")){
+            } else if (extension.equals("xls")) {
                 workBook = new HSSFWorkbook(fileInputStream);
-            }
-            else{
-                infoText.setText(infoBegin + "Can't parse this type of file.");
+            } else {
+                infoText.setText(Utility.InfoBegin + "Can't parse this type of file.");
                 return;
             }
-            readWorkbook(workBook);
+            String info = "";
+            if (!reader.Read(workBook, info)) {
+                infoText.setText(info);
+            }
             // setting data to interface
-            creditAmount.setText(creditAmountLabelText + creditAmountVal + "₽");
-            creditTerm.setText(creditTermLabelText + creditTermVal + " month");
-            interestRate.setText(interestRateLabelText + interestRateVal + "%");
-            paymentDate.setText(paymentDateLabelText + paymentDateVal);
-            dayOfTheContract.setText(dayOfTheContractLabelText + dayofTheContractVal);
+            creditAmount.setText(Utility.CreditAmountText + reader.getCreditAmountVal() + "₽");
+            creditTerm.setText(Utility.CreditTermText + reader.getCreditTermVal() + " month");
+            interestRate.setText(Utility.InterestRateText + reader.getInterestRateVal() + "%");
+            paymentDate.setText(paymentDateLabelText + reader.getPaymentDateVal());
+            dayOfTheContract.setText(dayOfTheContractLabelText + reader.getDayofTheContractVal());
             //
             calculationType.setItems(observableList);
             calculationType.setValue(val.get(0));
+            //
+            xDataType.setItems(xyObservableList);
+            yDataType.setItems(xyObservableList);
             // Finish
-
-            isReaded = true;
+            reader.setRead(true);
             calculationType.setDisable(false);
             calculateButton.setDisable(false);
             resultTable.setDisable(false);
-            infoText.setText(infoBegin + "File read successful.");
+            infoText.setText(info);
         }
     }
 
@@ -205,8 +178,8 @@ public class Controller {
         col6.setCellValueFactory(new PropertyValueFactory<>("sumOfFee"));
         col7.setCellValueFactory(new PropertyValueFactory<>("feeLeft"));
         // Legacy code
-        if (!isReaded) {
-            infoText.setText(infoBegin + "Read init file first.");
+        if (!reader.isRead()) {
+            infoText.setText(Utility.InfoBegin + "Read init file first.");
             return;
         }
         // end of legacy code
@@ -214,16 +187,24 @@ public class Controller {
 
         // Annuity payment
         if (calculationType.getValue() == val.get(0)) {
-            paymentMethod = new AnnuityPayment(creditAmountVal, creditTermVal,
-                    interestRateVal, paymentDateVal, dayofTheContractVal);
+            paymentMethod = new AnnuityPayment(
+                    reader.getCreditAmountVal(),
+                    reader.getCreditTermVal(),
+                    reader.getInterestRateVal(),
+                    reader.getPaymentDateVal(),
+                    reader.getDayofTheContractVal());
         }
         // Different payment
         else {
-            paymentMethod = new DifferentPayment(creditAmountVal, creditTermVal,
-                    interestRateVal, paymentDateVal, dayofTheContractVal);
+            paymentMethod = new DifferentPayment(
+                    reader.getCreditAmountVal(),
+                    reader.getCreditTermVal(),
+                    reader.getInterestRateVal(),
+                    reader.getPaymentDateVal(),
+                    reader.getDayofTheContractVal());
         }
         XYChart.Series series = new XYChart.Series();
-        for (int i = 0; i < creditTermVal + 1; ++i) {
+        for (int i = 0; i < reader.getCreditTermVal() + 1; ++i) {
             DataForTable tmp = null;
             if (i == 0) {
                 tmp = paymentMethod.getFirstMonthFee();
@@ -242,13 +223,21 @@ public class Controller {
         series.setName("results");
         //graphicLineChart.setTitle("results");
         isCalculated = true;
-        infoText.setText(infoBegin + "Calculated.");
+        infoText.setText(Utility.InfoBegin + "Calculated.");
+    }
+
+    @FXML
+    protected void onAddGraphicButton() {
+
     }
 
     @FXML
     protected void onDrawGraphicButton() {
         resultTable.setVisible(!resultTable.isVisible());
         graphicLineChart.setVisible(!graphicLineChart.isVisible());
+        // xDataType.setDisable(!xDataType.isDisabled());
+        //  yDataType.setDisable(!yDataType.isDisabled());
+        //  addGraphicButton.setDisable(!addGraphicButton.isDisabled());
     }
 
     @FXML
@@ -272,7 +261,7 @@ public class Controller {
     @FXML
     protected void onRuLangButton() {
         if (!isRuLang) {
-            readmeTextArea.setText(readmeRuText);
+            readmeTextArea.setText(Utility.ReadmeRuText);
             isRuLang = !isRuLang;
         }
     }
@@ -280,7 +269,7 @@ public class Controller {
     @FXML
     protected void onEnLangButton() {
         if (isRuLang) {
-            readmeTextArea.setText(readmeEnText);
+            readmeTextArea.setText(Utility.ReadmeEnText);
             isRuLang = !isRuLang;
         }
     }
@@ -299,12 +288,13 @@ public class Controller {
         chooser.getExtensionFilters().add(extFilter);
         File file = chooser.showSaveDialog(new Stage());
         if (file != null) {
+            // TODO: add ResultSaver class
             FileOutputStream out = null;
             try {
                 file.createNewFile();
                 out = new FileOutputStream(file);
             } catch (FileNotFoundException e) {
-                infoText.setText(infoBegin + e.getMessage());
+                infoText.setText(Utility.InfoBegin + e.getMessage());
                 return;
             }
             XSSFWorkbook myWorkBook = new XSSFWorkbook();
@@ -329,11 +319,11 @@ public class Controller {
             for (int i = 0; i < 6; ++i) {
                 row.createCell(i);
             }
-            row.getCell(0).setCellValue(creditAmountVal);
-            row.getCell(1).setCellValue(creditTermVal);
-            row.getCell(2).setCellValue(interestRateVal);
-            row.getCell(3).setCellValue(paymentDateVal);
-            row.getCell(4).setCellValue(dayofTheContractVal);
+            row.getCell(0).setCellValue(reader.getCreditAmountVal());
+            row.getCell(1).setCellValue(reader.getCreditTermVal());
+            row.getCell(2).setCellValue(reader.getInterestRateVal());
+            row.getCell(3).setCellValue(reader.getPaymentDateVal());
+            row.getCell(4).setCellValue(reader.getDayofTheContractVal());
             row.getCell(5).setCellValue(paymentMethod.getPaymentType());
             row = resultSheet.getRow(2);
             // TODO: Solve this strange thing
@@ -371,7 +361,7 @@ public class Controller {
             }
             myWorkBook.write(out);
             out.close();
-            infoText.setText(infoBegin + "File saved successful.");
+            infoText.setText(Utility.InfoBegin + "File saved successful.");
         }
     }
 }
