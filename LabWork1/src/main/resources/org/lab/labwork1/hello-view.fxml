@@ -85,7 +85,12 @@
          </font>
       </Label>
       <Button fx:id="addGraphicButton" disable="true" layoutX="388.0" layoutY="30.0" mnemonicParsing="false" onAction="#onAddGraphicButton" text="Add graphic" />
-      <Button fx:id="deleteGraphicButton" onAction="#onDeleteGraphicButton" disable="true" layoutX="388.0" layoutY="123.0" mnemonicParsing="false" text="Delete graphic" />
+      <Button fx:id="deleteGraphicButton" disable="true" layoutX="388.0" layoutY="123.0" mnemonicParsing="false" onAction="#onDeleteGraphicButton" text="Delete graphic" />
       <ComboBox fx:id="graphicComboBox" disable="true" layoutX="238.0" layoutY="123.0" prefWidth="150.0" />
+      <Label fx:id="percentPaySum" layoutX="2.0" layoutY="134.0" prefHeight="16.0" prefWidth="229.0" text="Sum of percent pay:">
+         <font>
+            <Font name="Times New Roman" size="14.0" />
+         </font>
+      </Label>
    </children>
 </AnchorPane>

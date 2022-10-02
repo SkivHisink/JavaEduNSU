@@ -59,6 +59,9 @@ public class Controller {
     private Label creditTerm;
     @FXML
     private Label interestRate;
+    @FXML
+    private Label percentPaySum;
+    private String percentPaySumBegin="Sum of percent pay:";
     private String paymentDateLabelText = "Payment date:";
     @FXML
     private Label paymentDate;
@@ -200,6 +203,7 @@ boolean isOpenDialog = false;
             tmp = paymentMethod.getFirstMonthFee();
             tmp.setN(0);
             resultTable.getItems().add(tmp);
+            double calcperSum=0;
             for (int i = 1; i < reader.getCreditTermVal() + 1; ++i) {
                 tmp = paymentMethod.getNotFirstMonthFee(i, info);
                 if (tmp == null) {
@@ -207,6 +211,7 @@ boolean isOpenDialog = false;
                 }
                 tmp.setN(i);
                 resultTable.getItems().add(tmp);
+                calcperSum +=tmp.getPercentSum();
             }
             if (tmp == null) {
                 infoText.setText(Utility.InfoBegin + info);
@@ -218,6 +223,7 @@ boolean isOpenDialog = false;
             tmp.setFeeLeft(0);
             tmp.setSumOfFee(Utility.bankingRound(
                     tmp.getGeneralPaymentSize()-tmp.getPercentSum()));
+            percentPaySum.setText(percentPaySumBegin+calcperSum);
             resultTable.getItems().set(resultTable.getItems().size() - 1, (Object) tmp);
         } catch (Exception e) {
             infoText.setText(Utility.InfoBegin +
