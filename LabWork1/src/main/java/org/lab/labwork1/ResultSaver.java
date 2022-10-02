@@ -11,10 +11,9 @@ public class ResultSaver {
     public boolean isSaved = false;
 
     public boolean createOrOpenFileStream(File file, String info) {
-        FileOutputStream out = null;
         try {
             file.createNewFile();
-            out = new FileOutputStream(file);
+            saveOutput = new FileOutputStream(file);
         } catch (Exception e) {
             info = e.getMessage();
             return false;

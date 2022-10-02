@@ -1,5 +1,8 @@
 package org.lab.labwork1;
 
+import java.time.Year;
+import java.time.YearMonth;
+
 public final class DifferentPayment extends LabTaskPaymentBase {
     private double generalFee;
 
@@ -20,12 +23,11 @@ public final class DifferentPayment extends LabTaskPaymentBase {
     public DataForTable getNotFirstMonthFee(int monthNumber, String info){
         super.getNotFirstMonthFee(monthNumber, info);
         DataForTable result = new DataForTable();
-        solveDateProblem(result, monthNumber);
+        solveDateProblem(result, monthNumber); //1, 2
         result.setSumOfFee(generalFee); // 5
         leftToPay -= generalFee;
         result.setFeeLeft(Utility.bankingRound(leftToPay)); //6 // rounding
-        result.setPercentSum(leftToPay * interestRate / 12 / 100); //4
-        result.setPercentSum(Utility.bankingRound(result.getPercentSum())); // rounding
+        solvePercentProblem(result, monthNumber); //4
         result.setGeneralPaymentSize(Utility.bankingRound(
                 result.getSumOfFee() + result.getPercentSum())); //3
         return result;

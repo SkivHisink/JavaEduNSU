@@ -106,8 +106,7 @@ public class Controller {
         graphicsContainer = new HashMap<>();
         graphicNamesList = new ArrayList<>();
     }
-
-
+boolean isOpenDialog = false;
     @FXML
     protected void onOpenExcelButtonClick() {
         FileChooser.ExtensionFilter extFilter;
@@ -128,29 +127,37 @@ public class Controller {
         col5.setCellValueFactory(new PropertyValueFactory<>("percentSum"));
         col6.setCellValueFactory(new PropertyValueFactory<>("sumOfFee"));
         col7.setCellValueFactory(new PropertyValueFactory<>("feeLeft"));
-        File file = openFileChooser.showOpenDialog(new Stage());
-        if (file != null) {
-            if (!reader.Read(file, info)) {
-                infoText.setText(Utility.InfoBegin + info);
+        if(!isOpenDialog) {
+            isOpenDialog = true;
+            File file = openFileChooser.showOpenDialog(new Stage());
+            if (file != null) {
+                if (!reader.Read(file, info)) {
+                    infoText.setText(Utility.InfoBegin + info);
+                    isOpenDialog = false;
+                    return;
+                }
+                // setting data to interface
+                creditAmount.setText(Utility.CreditAmountText + reader.getCreditAmountVal() + "₽");
+                creditTerm.setText(Utility.CreditTermText + reader.getCreditTermVal() + " month");
+                interestRate.setText(Utility.InterestRateText + reader.getInterestRateVal() + "%");
+                paymentDate.setText(paymentDateLabelText + reader.getPaymentDateVal());
+                dayOfTheContract.setText(dayOfTheContractLabelText + reader.getDayofTheContractVal());
+                //
+                calculationType.setItems(observableList);
+                calculationType.setValue(val.get(0));
+                //
+                xDataType.setItems(xyObservableList);
+                xDataType.setValue(xyObservableList.get(0));
+                yDataType.setItems(xyObservableList);
+                yDataType.setValue(xyObservableList.get(6));
+                // Finish
+                reader.setRead(true);
+                calculationType.setDisable(false);
+                calculateButton.setDisable(false);
+                resultTable.setDisable(false);
+                infoText.setText(info);
             }
-            // setting data to interface
-            creditAmount.setText(Utility.CreditAmountText + reader.getCreditAmountVal() + "₽");
-            creditTerm.setText(Utility.CreditTermText + reader.getCreditTermVal() + " month");
-            interestRate.setText(Utility.InterestRateText + reader.getInterestRateVal() + "%");
-            paymentDate.setText(paymentDateLabelText + reader.getPaymentDateVal());
-            dayOfTheContract.setText(dayOfTheContractLabelText + reader.getDayofTheContractVal());
-            //
-            calculationType.setItems(observableList);
-            calculationType.setValue(val.get(0));
-            //
-            xDataType.setItems(xyObservableList);
-            yDataType.setItems(xyObservableList);
-            // Finish
-            reader.setRead(true);
-            calculationType.setDisable(false);
-            calculateButton.setDisable(false);
-            resultTable.setDisable(false);
-            infoText.setText(info);
+            isOpenDialog = false;
         }
     }
 
@@ -184,10 +191,11 @@ public class Controller {
             resultTable.getItems().clear();
         }
         setPaymentType();
-        if(paymentMethod == null){
+        if (paymentMethod == null) {
             infoText.setText(Utility.InfoBegin + info);
             return;
-        }try {
+        }
+        try {
             DataForTable tmp = null;
             tmp = paymentMethod.getFirstMonthFee();
             tmp.setN(0);
@@ -204,10 +212,16 @@ public class Controller {
                 infoText.setText(Utility.InfoBegin + info);
                 return;
             }
-        }
-        catch (Exception e){
+            tmp = (DataForTable) resultTable.getItems().get(resultTable.getItems().size() - 1);
+            tmp.setGeneralPaymentSize(Utility.bankingRound(
+                    tmp.getGeneralPaymentSize() + tmp.getFeeLeft()));
+            tmp.setFeeLeft(0);
+            tmp.setSumOfFee(Utility.bankingRound(
+                    tmp.getGeneralPaymentSize()-tmp.getPercentSum()));
+            resultTable.getItems().set(resultTable.getItems().size() - 1, (Object) tmp);
+        } catch (Exception e) {
             infoText.setText(Utility.InfoBegin +
-                    "Problem in calculations. Error: " +e.getMessage());
+                    "Problem in calculations. Error: " + e.getMessage());
             return;
         }
         drawGraphicButton.setDisable(false);
@@ -215,6 +229,7 @@ public class Controller {
         isCalculated = true;
         info = "Calculated.";
         infoText.setText(Utility.InfoBegin + info);
+        onAddGraphicButton();
     }
 
     private List<String> getData(String type) {
@@ -275,6 +290,8 @@ public class Controller {
             graphicsContainer.put(Integer.toString(counterGraph), series); // Are we need it?! // TODO: solve it
             counterGraph++;
             graphicLineChart.getData().add(series);
+            graphicLineChart.setDisable(true);
+            graphicLineChart.setDisable(false);
             var tempObsList = FXCollections.observableList(graphicNamesList);
             graphicComboBox.getItems().clear();
             graphicComboBox.setItems(tempObsList);
@@ -337,23 +354,29 @@ public class Controller {
                 "Excel files (*.xlsx)", // TODO: ;*.xls
                 "*.xlsx"); // TODO: add supporting of , "*.xls"
         saveFileChooser.getExtensionFilters().add(extFilter);
-        File file = saveFileChooser.showSaveDialog(new Stage());
-        if (file != null) {
-            ResultSaver saver = new ResultSaver();
-            if(!saver.createOrOpenFileStream(file, info)){
-                infoText.setText(Utility.InfoBegin + info);
-                return;
+        if(!isOpenDialog) {
+            isOpenDialog=true;
+            File file = saveFileChooser.showSaveDialog(new Stage());
+            if (file != null) {
+                ResultSaver saver = new ResultSaver();
+                if (!saver.createOrOpenFileStream(file, info)) {
+                    infoText.setText(Utility.InfoBegin + info);
+                    isOpenDialog=false;
+                    return;
+                }
+                if (!saver.saveData(resultTable.getItems(), paymentMethod, info)) {
+                    infoText.setText(Utility.InfoBegin + info);
+                    isOpenDialog=false;
+                    return;
+                }
+                infoText.setText(Utility.InfoBegin + "File saved successful.");
             }
-            if(!saver.saveData(resultTable.getItems(), paymentMethod, info)){
-                infoText.setText(Utility.InfoBegin + info);
-                return;
-            }
-            infoText.setText(Utility.InfoBegin + "File saved successful.");
+            isOpenDialog=false;
         }
     }
 
     @FXML
     protected void onDeleteGraphicButton() {
-        //TODO:Add delete button
+        graphicLineChart.getData().clear();
     }
 }
