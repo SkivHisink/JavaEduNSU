@@ -7,10 +7,11 @@ public abstract class PaymentBase extends InitParamBase
     public abstract String getPaymentType();
     public abstract DataForTable getFirstMonthFee();
 
-    public DataForTable getNotFirstMonthFee(int monthNumber) throws Exception {
+    public DataForTable getNotFirstMonthFee(int monthNumber, String info) {
         if (monthNumber > creditTerm) {
-            throw new Exception("monthNumber has wrong value");
+            info = "monthNumber has wrong value";
+            return null;
         }
-        return null;
+        return new DataForTable();
     }
 }

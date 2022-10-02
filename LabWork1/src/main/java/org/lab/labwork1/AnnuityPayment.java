@@ -19,15 +19,20 @@ public final class AnnuityPayment extends LabTaskPaymentBase {
     }
 
     @Override
-    public DataForTable getNotFirstMonthFee(int monthNumber) throws Exception {
-        super.getNotFirstMonthFee(monthNumber);
-        DataForTable result = new DataForTable();
+    public DataForTable getNotFirstMonthFee(int monthNumber, String info) {
+        DataForTable result = super.getNotFirstMonthFee(monthNumber, info);
+        if(result == null){
+            return null;
+        }
         solveDateProblem(result, monthNumber);
         result.setGeneralPaymentSize(annuityFee); // 3
-        result.setPercentSum(monthlyInterestRate * leftToPay); // 4
-        result.setSumOfFee(result.getGeneralPaymentSize() - result.getPercentSum()); // 5
+        result.setPercentSum(Utility.
+                bankingRound(monthlyInterestRate * leftToPay)); // 4
+        result.setSumOfFee(Utility.
+                bankingRound(result.getGeneralPaymentSize() -
+                        result.getPercentSum())); // 5
         leftToPay -= result.getSumOfFee();
-        result.setFeeLeft(leftToPay); // 6
+        result.setFeeLeft(Utility.bankingRound(leftToPay)); // 6
         return result;
     }
 }

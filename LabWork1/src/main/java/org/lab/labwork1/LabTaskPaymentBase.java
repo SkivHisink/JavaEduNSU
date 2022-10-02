@@ -63,6 +63,7 @@ public class LabTaskPaymentBase extends  PaymentBase{
             result.setDayOfUsing(daysInMonth - beginDate + 1 + endDate); // 1
             beginMonth += 1;
         }
+        result.setPercentSum(Utility.bankingRound(result.getPercentSum()));
         result.setPaymentDateVal(paymentDate + "." + Utility.monthFormatFixer(beginMonth) + "." + beginYear); // 2
         result.setFeeLeft(this.creditAmount); // 6
         result.setGeneralPaymentSize(Utility.bankingRound(result.getPercentSum() + result.getSumOfFee())); // 3

@@ -17,14 +17,15 @@ public final class DifferentPayment extends LabTaskPaymentBase {
 
 
     @Override
-    public DataForTable getNotFirstMonthFee(int monthNumber) throws Exception {
-        super.getNotFirstMonthFee(monthNumber);
+    public DataForTable getNotFirstMonthFee(int monthNumber, String info){
+        super.getNotFirstMonthFee(monthNumber, info);
         DataForTable result = new DataForTable();
         solveDateProblem(result, monthNumber);
         result.setSumOfFee(generalFee); // 5
         leftToPay -= generalFee;
-        result.setFeeLeft(leftToPay); //6
+        result.setFeeLeft(Utility.bankingRound(leftToPay)); //6 // rounding
         result.setPercentSum(leftToPay * interestRate / 12 / 100); //4
+        result.setPercentSum(Utility.bankingRound(result.getPercentSum())); // rounding
         result.setGeneralPaymentSize(Utility.bankingRound(
                 result.getSumOfFee() + result.getPercentSum())); //3
         return result;

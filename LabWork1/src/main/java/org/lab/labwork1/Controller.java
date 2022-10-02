@@ -11,11 +11,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.*;
 import java.util.*;
@@ -73,7 +68,7 @@ public class Controller {
     @FXML
     private LineChart graphicLineChart;
     //Data
-    private initParamReader reader;
+    private InitParamReader reader;
     // Additional
     private boolean isCalculated = false;
     private PaymentBase paymentMethod = null;
@@ -90,6 +85,7 @@ public class Controller {
     Map<String, XYChart.Series> graphicsContainer;
     private List<String> graphicNamesList;
     int counterGraph = 0;
+    private String info = "";
 
     public Controller() {
         //Generating payment types
@@ -106,50 +102,36 @@ public class Controller {
         xyDataTypeNames.add("Остаток задолжности");
         observableList = FXCollections.observableList(val);
         xyObservableList = FXCollections.observableList(xyDataTypeNames);
-        reader = new initParamReader();
+        reader = new InitParamReader();
         graphicsContainer = new HashMap<>();
         graphicNamesList = new ArrayList<>();
     }
 
 
     @FXML
-    protected void onOpenExcelButtonClick() throws IOException {
-        FileChooser chooser = new FileChooser();
-        chooser.setTitle("Open File");
-        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
+    protected void onOpenExcelButtonClick() {
+        FileChooser.ExtensionFilter extFilter;
+        FileChooser openFileChooser = new FileChooser();
+        extFilter = new FileChooser.ExtensionFilter(
                 "Excel files (*.xlsx;*.xls)",
                 "*.xlsx", "*.xls");
-        chooser.getExtensionFilters().add(extFilter);
+        openFileChooser.getExtensionFilters().add(extFilter);
         extFilter = new FileChooser.ExtensionFilter(
                 "Any files (*.*)",
                 "*.*");
-        chooser.getExtensionFilters().add(extFilter);
-        File file = chooser.showOpenDialog(new Stage());
+        openFileChooser.getExtensionFilters().add(extFilter);
+        openFileChooser.setTitle("Open File");
+        col1.setCellValueFactory(new PropertyValueFactory<>("N"));
+        col2.setCellValueFactory(new PropertyValueFactory<>("dayOfUsing"));
+        col3.setCellValueFactory(new PropertyValueFactory<>("paymentDateVal"));
+        col4.setCellValueFactory(new PropertyValueFactory<>("generalPaymentSize"));
+        col5.setCellValueFactory(new PropertyValueFactory<>("percentSum"));
+        col6.setCellValueFactory(new PropertyValueFactory<>("sumOfFee"));
+        col7.setCellValueFactory(new PropertyValueFactory<>("feeLeft"));
+        File file = openFileChooser.showOpenDialog(new Stage());
         if (file != null) {
-            FileInputStream fileInputStream = null;
-            try {
-                fileInputStream = new FileInputStream(file.getPath());
-            } catch (FileNotFoundException e) {
-                infoText.setText(Utility.InfoBegin + e.getMessage());
-                return;
-            }
-            String extension = "";
-            int i = file.getPath().lastIndexOf('.');
-            if (i > 0) {
-                extension = file.getPath().substring(i + 1);
-            }
-            Workbook workBook = null;
-            if (extension.equals("xlsx")) {
-                workBook = new XSSFWorkbook(fileInputStream);
-            } else if (extension.equals("xls")) {
-                workBook = new HSSFWorkbook(fileInputStream);
-            } else {
-                infoText.setText(Utility.InfoBegin + "Can't parse this type of file.");
-                return;
-            }
-            String info = "";
-            if (!reader.Read(workBook, info)) {
-                infoText.setText(info);
+            if (!reader.Read(file, info)) {
+                infoText.setText(Utility.InfoBegin + info);
             }
             // setting data to interface
             creditAmount.setText(Utility.CreditAmountText + reader.getCreditAmountVal() + "₽");
@@ -172,28 +154,7 @@ public class Controller {
         }
     }
 
-    @FXML
-    protected void onCalculateButton() throws Exception {
-        isCalculated = false;
-        for (int i = 0; i < resultTable.getItems().size(); i++) {
-            resultTable.getItems().clear();
-        }
-        col1.setCellValueFactory(new PropertyValueFactory<>("N"));
-        col2.setCellValueFactory(new PropertyValueFactory<>("dayOfUsing"));
-        col3.setCellValueFactory(new PropertyValueFactory<>("paymentDateVal"));
-        col4.setCellValueFactory(new PropertyValueFactory<>("generalPaymentSize"));
-        col5.setCellValueFactory(new PropertyValueFactory<>("percentSum"));
-        col6.setCellValueFactory(new PropertyValueFactory<>("sumOfFee"));
-        col7.setCellValueFactory(new PropertyValueFactory<>("feeLeft"));
-        // Legacy code
-        if (!reader.isRead()) {
-            infoText.setText(Utility.InfoBegin + "Read init file first.");
-            return;
-        }
-        // end of legacy code
-        List<DataForTable> dataTemp = new ArrayList<DataForTable>();
-
-        // Annuity payment
+    private void setPaymentType() {
         if (calculationType.getValue() == val.get(0)) {
             paymentMethod = new AnnuityPayment(
                     reader.getCreditAmountVal(),
@@ -203,28 +164,57 @@ public class Controller {
                     reader.getDayofTheContractVal());
         }
         // Different payment
-        else {
+        else if (calculationType.getValue() == val.get(1)) {
             paymentMethod = new DifferentPayment(
                     reader.getCreditAmountVal(),
                     reader.getCreditTermVal(),
                     reader.getInterestRateVal(),
                     reader.getPaymentDateVal(),
                     reader.getDayofTheContractVal());
+        } else {
+            paymentMethod = null;
+            info = "Payment method problem";
         }
-        for (int i = 0; i < reader.getCreditTermVal() + 1; ++i) {
+    }
+
+    @FXML
+    protected void onCalculateButton() {
+        isCalculated = false;
+        for (int i = 0; i < resultTable.getItems().size(); i++) {
+            resultTable.getItems().clear();
+        }
+        setPaymentType();
+        if(paymentMethod == null){
+            infoText.setText(Utility.InfoBegin + info);
+            return;
+        }try {
             DataForTable tmp = null;
-            if (i == 0) {
-                tmp = paymentMethod.getFirstMonthFee();
-            } else {
-                tmp = paymentMethod.getNotFirstMonthFee(i);
-            }
-            tmp.setN(i);
+            tmp = paymentMethod.getFirstMonthFee();
+            tmp.setN(0);
             resultTable.getItems().add(tmp);
+            for (int i = 1; i < reader.getCreditTermVal() + 1; ++i) {
+                tmp = paymentMethod.getNotFirstMonthFee(i, info);
+                if (tmp == null) {
+                    break;
+                }
+                tmp.setN(i);
+                resultTable.getItems().add(tmp);
+            }
+            if (tmp == null) {
+                infoText.setText(Utility.InfoBegin + info);
+                return;
+            }
+        }
+        catch (Exception e){
+            infoText.setText(Utility.InfoBegin +
+                    "Problem in calculations. Error: " +e.getMessage());
+            return;
         }
         drawGraphicButton.setDisable(false);
         saveInExcelButton.setDisable(false);
         isCalculated = true;
-        infoText.setText(Utility.InfoBegin + "Calculated.");
+        info = "Calculated.";
+        infoText.setText(Utility.InfoBegin + info);
     }
 
     private List<String> getData(String type) {
@@ -266,6 +256,7 @@ public class Controller {
                 result.add(Double.toString(tmp.getFeeLeft()));
             }
         } else {
+            info = "Data type for " + type + " data isn't chosen. Please choose data type ";
         }
         return result;
     }
@@ -281,16 +272,15 @@ public class Controller {
             }
             series.setName("graphic_" + counterGraph);
             graphicNamesList.add(series.getName());
-            graphicsContainer.put(Integer.toString(counterGraph), series); // Are we need it?!
+            graphicsContainer.put(Integer.toString(counterGraph), series); // Are we need it?! // TODO: solve it
             counterGraph++;
             graphicLineChart.getData().add(series);
             var tempObsList = FXCollections.observableList(graphicNamesList);
             graphicComboBox.getItems().clear();
             graphicComboBox.setItems(tempObsList);
-        }
-        catch(Exception e)
-        {
-            //TODO: delete try-catch block
+        } catch (Exception e) {
+            info = "Can't set data for this xy data types. Error:" + e.getMessage();
+            infoText.setText(Utility.InfoBegin + info);
         }
     }
 
@@ -340,92 +330,24 @@ public class Controller {
     }
 
     @FXML
-    protected void onSaveInExcelButton() throws IOException {
-        if (!isCalculated) {
-            // TODO: send signal to info
-            return;
-        }
-        FileChooser chooser = new FileChooser();
-        chooser.setTitle("Open File");
+    protected void onSaveInExcelButton() {
+        FileChooser saveFileChooser = new FileChooser();
+        saveFileChooser.setTitle("Save File");
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
                 "Excel files (*.xlsx)", // TODO: ;*.xls
                 "*.xlsx"); // TODO: add supporting of , "*.xls"
-        chooser.getExtensionFilters().add(extFilter);
-        File file = chooser.showSaveDialog(new Stage());
+        saveFileChooser.getExtensionFilters().add(extFilter);
+        File file = saveFileChooser.showSaveDialog(new Stage());
         if (file != null) {
-            // TODO: add ResultSaver class
-            FileOutputStream out = null;
-            try {
-                file.createNewFile();
-                out = new FileOutputStream(file);
-            } catch (FileNotFoundException e) {
-                infoText.setText(Utility.InfoBegin + e.getMessage());
+            ResultSaver saver = new ResultSaver();
+            if(!saver.createOrOpenFileStream(file, info)){
+                infoText.setText(Utility.InfoBegin + info);
                 return;
             }
-            XSSFWorkbook myWorkBook = new XSSFWorkbook();
-            myWorkBook.createSheet("ResultSheet");
-            Sheet resultSheet = myWorkBook.getSheet(myWorkBook.getSheetName(0));
-            for (int i = 0; i < 4; ++i) {
-                resultSheet.createRow(i);
+            if(!saver.saveData(resultTable.getItems(), paymentMethod, info)){
+                infoText.setText(Utility.InfoBegin + info);
+                return;
             }
-            Row row = resultSheet.getRow(0);
-            // TODO: Solve this strange thing
-            for (int i = 0; i < 6; ++i) {
-                row.createCell(i);
-            }
-            row.getCell(0).setCellValue("Сумма кредита");
-            row.getCell(1).setCellValue("Срок кредита");
-            row.getCell(2).setCellValue("Процентная ставка");
-            row.getCell(3).setCellValue("Дата платежа");
-            row.getCell(4).setCellValue("Кредит предоставляется заемщику");
-            row.getCell(5).setCellValue("Тип расчета");
-            row = resultSheet.getRow(1);
-            // TODO: Solve this strange thing
-            for (int i = 0; i < 6; ++i) {
-                row.createCell(i);
-            }
-            row.getCell(0).setCellValue(reader.getCreditAmountVal());
-            row.getCell(1).setCellValue(reader.getCreditTermVal());
-            row.getCell(2).setCellValue(reader.getInterestRateVal());
-            row.getCell(3).setCellValue(reader.getPaymentDateVal());
-            row.getCell(4).setCellValue(reader.getDayofTheContractVal());
-            row.getCell(5).setCellValue(paymentMethod.getPaymentType());
-            row = resultSheet.getRow(2);
-            // TODO: Solve this strange thing
-            for (int i = 0; i < 5; ++i) {
-                row.createCell(i);
-            }
-            row.getCell(0).setCellValue("n");
-            row.getCell(1).setCellValue("Кол-во дней пользования заемными средствами");
-            row.getCell(2).setCellValue("Дата платежа");
-            row.getCell(3).setCellValue("Общая сумма платежа");
-            row.getCell(4).setCellValue("В том числе");
-            row = resultSheet.getRow(3);
-            // TODO: Solve this strange thing
-            for (int i = 0; i < 7; ++i) {
-                row.createCell(i);
-            }
-            row.getCell(4).setCellValue("сумма процентов");
-            row.getCell(5).setCellValue("сумма погашаемого долга");
-            row.getCell(6).setCellValue("остаток задолжности");
-            for (int i = 0; i < resultTable.getItems().size(); ++i) {
-                resultSheet.createRow(i + 4);
-                row = resultSheet.getRow(resultSheet.getLastRowNum());
-                // TODO: Solve this strange thing
-                for (int j = 0; j < 7; ++j) {
-                    row.createCell(j);
-                }
-                var item = (DataForTable) resultTable.getItems().get(i);
-                row.getCell(0).setCellValue(item.getN());
-                row.getCell(1).setCellValue(item.getDayOfUsing());
-                row.getCell(2).setCellValue(item.getPaymentDateVal());
-                row.getCell(3).setCellValue(item.getGeneralPaymentSize());
-                row.getCell(4).setCellValue(item.getPercentSum());
-                row.getCell(5).setCellValue(item.getSumOfFee());
-                row.getCell(6).setCellValue(item.getFeeLeft());
-            }
-            myWorkBook.write(out);
-            out.close();
             infoText.setText(Utility.InfoBegin + "File saved successful.");
         }
     }
