@@ -30,12 +30,32 @@ public final class AnnuityPayment extends LabTaskPaymentBase {
         }
         solveDateProblem(result, monthNumber);
         result.setGeneralPaymentSize(annuityFee); // 3
-        solvePercentProblem(result, monthNumber);
+        result.setPercentSum(monthlyInterestRate * leftToPay); // 4
+        //solvePercentProblem(result, monthNumber); //it doesn't work correctly
         result.setSumOfFee(Utility.
-                bankingRound(result.getGeneralPaymentSize() -
+               bankingRound(result.getGeneralPaymentSize() -
                         result.getPercentSum())); // 5
         leftToPay -= result.getSumOfFee();
         result.setFeeLeft(Utility.bankingRound(leftToPay)); // 6
         return result;
     }
 }
+
+//day annuity coef
+//var tempStr = dayOfTheContract.split("\\.");
+//int beginMonth = Integer.parseInt(tempStr[1]);
+//int beginYear = Integer.parseInt(tempStr[2]);
+//int endMonth = Integer.parseInt(tempStr[1]) + creditTerm_;
+// endYear = Integer.parseInt(tempStr[2]);
+//if (endMonth > 12) {
+//    endYear += endMonth / 12;
+//    endMonth = endMonth % 12;
+//    if (endMonth == 0) {
+//        endMonth = 12;
+//        endYear -=1;
+//     }
+//}
+//var tempVar = Math.pow(1 + monthlyInterestRate/30, Utility.getDaysBetweenTwoDates(
+//        paymentDate + "." + Utility.monthFormatFixer(beginMonth) + "." + beginYear,
+//        paymentDate + "." + Utility.monthFormatFixer(endMonth) + "." + endYear
+//));

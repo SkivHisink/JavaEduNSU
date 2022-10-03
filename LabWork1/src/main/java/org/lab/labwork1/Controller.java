@@ -203,7 +203,7 @@ boolean isOpenDialog = false;
             tmp = paymentMethod.getFirstMonthFee();
             tmp.setN(0);
             resultTable.getItems().add(tmp);
-            double calcperSum=0;
+            int calcperSum = 0;
             for (int i = 1; i < reader.getCreditTermVal() + 1; ++i) {
                 tmp = paymentMethod.getNotFirstMonthFee(i, info);
                 if (tmp == null) {
@@ -211,7 +211,7 @@ boolean isOpenDialog = false;
                 }
                 tmp.setN(i);
                 resultTable.getItems().add(tmp);
-                calcperSum +=tmp.getPercentSum();
+                calcperSum += tmp.getPercentSum();
             }
             if (tmp == null) {
                 infoText.setText(Utility.InfoBegin + info);

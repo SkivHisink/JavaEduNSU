@@ -58,6 +58,7 @@ public class InitParamReader extends InitParamBase {
             interestRate = row.getCell(2).getNumericCellValue();
             paymentDate = (int) row.getCell(3).getNumericCellValue();
             dayOfTheContract = row.getCell(4).getStringCellValue();
+            fileInputStream.close();
         } catch (Exception e) {
             info = "Cells with initialize parameters have wrong value. " +
                     "Please check \"Help\" to fix all problems.";
