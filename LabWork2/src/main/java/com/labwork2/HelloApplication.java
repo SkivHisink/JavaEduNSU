@@ -8,12 +8,14 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 import java.io.*;
+import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.Duration;
 
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 
 public class HelloApplication extends Application {
     public static String executePost(String targetURL, String urlParameters) {
@@ -23,22 +25,26 @@ public class HelloApplication extends Application {
             //Create connection
             URL url = new URL(targetURL);
             connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("Content-Type",
-                    "application/x-www-form-urlencoded");
-
-            connection.setRequestProperty("Content-Length",
-                    Integer.toString(urlParameters.getBytes().length));
-            connection.setRequestProperty("Content-Language", "en-US");
-
+            connection.setRequestMethod("GET");
+            //connection.setRequestProperty("access_key", "854e02f58534616ef44487c12ab2d1cf");
+            //connection.setRequestProperty("symbols", "AAPL");
             connection.setUseCaches(false);
             connection.setDoOutput(true);
-
+            String inputLine;
+            final StringBuilder content = new StringBuilder();
+            try (final BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                while ((inputLine = in.readLine()) != null) {
+                    content.append(inputLine);
+                }
+                //return content.toString();
+            } catch (final Exception ex) {
+                ex.printStackTrace();
+                //return "";
+            }
             //Send request
-            DataOutputStream wr = new DataOutputStream (
-                    connection.getOutputStream());
-            wr.writeBytes(urlParameters);
-            wr.close();
+            //DataOutputStream wr = new DataOutputStream (connection.getOutputStream());
+            //wr.writeBytes(urlParameters);
+            //wr.close();
 
             //Get Response
             InputStream is = connection.getInputStream();
@@ -70,16 +76,23 @@ public class HelloApplication extends Application {
     }
 
     public static void main(String[] args) {
-        WebDriver driver = new ChromeDriver();
+        // don't have RU market
+        //executePost("http://api.marketstack.com/v1/eod?access_key=854e02f58534616ef44487c12ab2d1cf&symbols=AAPL", "symbols=AAPL");
+        // don't have RU market
+        // it works fine for getting tickers
+        //executePost("https://api.polygon.io/v3/reference/tickers?active=true&sort=ticker&order=asc&limit=10&apiKey=F0kqtZX1TutW2KpwnZMekqUb_fjsM9IR", "symbols=AAPL");
+        var it = new ChromeOptions();
+        //it.addArguments("--headless");
+        ///it.addArguments("--start-maximized");
+        ///it.setExperimentalOption("excludeSwitches", "enable-automation");
+        ///it.setExperimentalOption("useAutomationExtension", false);
+        WebDriver driver = new ChromeDriver(it);
         driver.get("https://www.finam.ru/profile/moex-akcii/gazprom/export/");
         String title = driver.getTitle();
         driver.manage().timeouts().implicitlyWait(Duration.ofMillis(500));
-        WebElement textBox = driver.findElement(By.name("finam-ui-quote-selector-title"));
-        WebElement submitButton = driver.findElement(By.cssSelector("button"));
-        textBox.sendKeys("Selenium");
+        WebElement comboBox = driver.findElement(By.className("finam-ui-dropdown-list"));
+        WebElement submitButton = driver.findElement(By.className("finam-ui-dialog-button-cancel"));
         submitButton.click();
-        WebElement message = driver.findElement(By.id("message"));
-        String value = message.getText();
         launch();
     }
 }
