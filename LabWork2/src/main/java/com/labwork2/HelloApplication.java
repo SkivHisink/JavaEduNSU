@@ -91,6 +91,8 @@ public class HelloApplication extends Application {
         String title = driver.getTitle();
         driver.manage().timeouts().implicitlyWait(Duration.ofMillis(500));
         WebElement comboBox = driver.findElement(By.className("finam-ui-dropdown-list"));
+        var comboBoxItems = comboBox.findElement(By.xpath("./div")).
+                findElement(By.xpath("./ul")).findElements(By.xpath("./li"));
         WebElement submitButton = driver.findElement(By.className("finam-ui-dialog-button-cancel"));
         submitButton.click();
         launch();
