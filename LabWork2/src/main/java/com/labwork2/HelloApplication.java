@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 
 import java.io.*;
@@ -12,6 +13,8 @@ import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -88,13 +91,56 @@ public class HelloApplication extends Application {
         ///it.setExperimentalOption("useAutomationExtension", false);
         WebDriver driver = new ChromeDriver(it);
         driver.get("https://www.finam.ru/profile/moex-akcii/gazprom/export/");
-        String title = driver.getTitle();
+        try {
+            var popup_close = driver.findElement(By.className("ld57581d9"));
+            if (popup_close != null) {
+                popup_close.click();
+                // !Yes!
+            }
+        }
+        catch(Exception e){
+            // $h*t happens
+        }
         driver.manage().timeouts().implicitlyWait(Duration.ofMillis(500));
-        WebElement comboBox = driver.findElement(By.className("finam-ui-dropdown-list"));
-        var comboBoxItems = comboBox.findElement(By.xpath("./div")).
+        String title = driver.getTitle();
+        var comboBox = driver.findElements(By.className("finam-ui-dropdown-list"));
+        var comboBoxItemsMarket = comboBox.get(0).findElement(By.xpath("./div")).
                 findElement(By.xpath("./ul")).findElements(By.xpath("./li"));
-        WebElement submitButton = driver.findElement(By.className("finam-ui-dialog-button-cancel"));
-        submitButton.click();
+        List<String> itemsListMarkets = new ArrayList<>();
+        for(int i=0;i<comboBoxItemsMarket.size();++i){
+            itemsListMarkets.add(comboBoxItemsMarket.get(i).getAttribute("innerHTML"));
+        }
+
+        var toClick = driver.findElement(By.className("finam-ui-quote-selector-market")).findElement(By.className("finam-ui-quote-selector-arrow"));
+        toClick.click();
+        var textToSelect = itemsListMarkets.get(0);
+        for(int i=0;i<itemsListMarkets.size();++i){
+            if(comboBoxItemsMarket.get(i).getAttribute("innerHTML").equals(textToSelect)){
+                comboBoxItemsMarket.get(i).click();
+                break;
+            }
+        }
+        var comboBoxItemsQuotes = comboBox.get(1).findElement(By.xpath("./div")).
+                findElement(By.xpath("./ul")).findElements(By.xpath("./li"));
+        var itemListQuotes = new ArrayList<String>();
+        for(int i=0;i<comboBoxItemsQuotes.size();++i) {
+            itemListQuotes.add(comboBoxItemsQuotes.get(i).getAttribute("innerHTML"));
+        }
+        toClick = driver.findElement(By.className("finam-ui-quote-selector-quote")).findElement(By.className("finam-ui-quote-selector-arrow"));
+        toClick.click();
+        textToSelect = itemListQuotes.get(1);
+        for(int i=0;i<itemsListMarkets.size();++i){
+            if(comboBoxItemsQuotes.get(i).getAttribute("innerHTML").equals(textToSelect)){
+                comboBoxItemsQuotes.get(i).click();
+                break;
+            }
+        }
+        WebElement submitButton = driver.findElement(By.id("issuer-profile-export-button"));
+        if (driver instanceof JavascriptExecutor) {
+            ((JavascriptExecutor)driver).executeScript("arguments[0].click();", submitButton);
+        } else {
+            throw new IllegalStateException("This driver does not support JavaScript!");
+        }
         launch();
     }
 }
