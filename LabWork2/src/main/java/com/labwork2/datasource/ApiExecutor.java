@@ -5,8 +5,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 
-public class ApiExecutor {
+public class ApiExecutor extends DataSourceBase{
     public static String executePost(String targetURL, String urlParameters) {
         HttpURLConnection connection = null;
 
@@ -54,6 +55,26 @@ public class ApiExecutor {
                 connection.disconnect();
             }
         }
+    }
+
+    @Override
+    public void connect() {
+
+    }
+
+    @Override
+    public void initElements() throws Exception {
+
+    }
+
+    @Override
+    public ArrayList<String> getMarketList() throws Exception {
+        return null;
+    }
+
+    @Override
+    public ArrayList<String> getQuotesList() throws Exception {
+        return null;
     }
     // don't have RU market
     //executePost("http://api.marketstack.com/v1/eod?access_key=854e02f58534616ef44487c12ab2d1cf&symbols=AAPL", "symbols=AAPL");

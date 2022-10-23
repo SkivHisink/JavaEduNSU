@@ -8,14 +8,15 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.CapabilityType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-public class FinamSelenium {
+public class FinamSelenium extends DataSourceBase {
     //Driver and its trinkets
     private String initURL = "https://www.finam.ru/profile/moex-akcii/gazprom/export/";
     private String downloadFilepath = "";
-    private WebDriver driver;
+    static public WebDriver driver;
     private ChromeOptions options;
     //Flags
     private boolean isConnected = false;
@@ -24,8 +25,12 @@ public class FinamSelenium {
     private List<WebElement> marketDropDownList;
     private List<WebElement> marketComboBoxList;
     private List<WebElement> quotesComboBoxList;
+    private List<WebElement> intervalComboBoxList;
     private WebElement buttonToOpenMarketCB;
     private WebElement buttonToOpenQuoteCB;
+    private WebElement buttonToOpenIntervalCB;
+
+    private ArrayList<String> intervalList = new ArrayList<>();
 
     // driver init
     public FinamSelenium(ChromeOptions options) {
@@ -35,13 +40,13 @@ public class FinamSelenium {
     // if someone need it to change
     public ChromeOptions stdOptionsInit() {
         options = new ChromeOptions();
-        try{
+        try {
             downloadFilepath = System.getProperty("user.dir");
-            System.out.print("Executing at =>"+downloadFilepath.replace("\\", "/"));
-        }catch (Exception e){
-            System.out.println("Exception caught ="+e.getMessage());
+            System.out.print("Executing at =>" + downloadFilepath.replace("\\", "/"));
+        } catch (Exception e) {
+            System.out.println("Exception caught =" + e.getMessage());
         }
-        options.addArguments("--headless"); // ninja mode
+        //options.addArguments("--headless"); // ninja mode
         HashMap<String, Object> chromePrefs = new HashMap<String, Object>();
         chromePrefs.put("profile.default_content_settings.popups", 0);
         chromePrefs.put("download.default_directory", downloadFilepath);
@@ -57,8 +62,10 @@ public class FinamSelenium {
         driver = new ChromeDriver(options);
     }
 
-    public void connect() {
+    @Override
+    public void connect() throws InterruptedException {
         driver.get(initURL);
+        Thread.sleep(500);
         //We need to remove ad
         try {
             var popup_close = driver.findElement(By.className("ld57581d9"));
@@ -79,11 +86,15 @@ public class FinamSelenium {
         if (!isConnected) {
             throw new Exception("You are not connected to finam. Please try to reconnect");
         }
+        if (!isCheckAfterFirst) {
+            return;
+        }
         if (!isInited) {
             throw new Exception("You are not initialized web elements. Please try to initialize web elements.");
         }
     }
 
+    @Override
     public void initElements() throws Exception {
         checkFlags(false);
         marketDropDownList = driver.findElements(By.className("finam-ui-dropdown-list"));
@@ -91,8 +102,14 @@ public class FinamSelenium {
                 findElement(By.xpath("./ul")).findElements(By.xpath("./li"));
         quotesComboBoxList = marketDropDownList.get(1).findElement(By.xpath("./div")).
                 findElement(By.xpath("./ul")).findElements(By.xpath("./li"));
-        buttonToOpenMarketCB = driver.findElement(By.className("finam-ui-quote-selector-market")).findElement(By.className("finam-ui-quote-selector-arrow"));
-        buttonToOpenQuoteCB = driver.findElement(By.className("finam-ui-quote-selector-quote")).findElement(By.className("finam-ui-quote-selector-arrow"));
+        intervalComboBoxList = marketDropDownList.get(2).findElement(By.xpath("./div")).
+                findElement(By.xpath("./ul")).findElements(By.xpath("./li"));
+        buttonToOpenMarketCB = driver.findElement(By.className("finam-ui-quote-selector-market")).
+                findElement(By.className("finam-ui-quote-selector-arrow"));
+        buttonToOpenQuoteCB = driver.findElement(By.className("finam-ui-quote-selector-quote")).
+                findElement(By.className("finam-ui-quote-selector-arrow"));
+        buttonToOpenIntervalCB = driver.findElement(By.className("finam-ui-controls-select")).
+                findElement(By.className("finam-ui-controls-select-arrow"));
         isInited = true;
     }
 
@@ -105,6 +122,7 @@ public class FinamSelenium {
         return resultList;
     }
 
+    @Override
     public ArrayList<String> getMarketList() throws Exception {
         return getList(marketComboBoxList);
     }
@@ -133,26 +151,25 @@ public class FinamSelenium {
         setComboBoxValue(quoteName, quoteNumber, quotesComboBoxList, buttonToOpenQuoteCB);
     }
 
-    public void setBeginDate(){
+    public void setBeginDate() {
 
     }
 
-    public void setEndDate(){
+    public void setEndDate() {
 
     }
 
-    public ArrayList<String> getDataSteps(){
-        var result= new ArrayList<String>();
+    public ArrayList<String> getDataSteps() {
+        var result = new ArrayList<String>();
         //
         return result;
     }
 
-    public void setDataStep()
-    {
+    public void setDataStep() {
 
     }
 
-    public void getData(){
+    public void getData() {
 
     }
 }
