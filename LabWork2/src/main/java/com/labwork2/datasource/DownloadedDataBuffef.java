@@ -22,4 +22,34 @@ public class DownloadedDataBuffef extends DataSourceBase {
     public ArrayList<String> getQuotesList() throws Exception {
         return null;
     }
+
+    @Override
+    public ArrayList<String> getIntervalList() throws Exception {
+        return null;
+    }
+
+    @Override
+    public void setMarket(String marketName, int marketNumber) throws Exception {
+
+    }
+
+    @Override
+    public void setQuote(String quoteName, int quoteNumber) throws Exception {
+
+    }
+
+    @Override
+    public void setInterval(String intervalName, int intervalNumber) throws Exception {
+
+    }
+
+    @Override
+    public void setBeginDate() {
+
+    }
+
+    @Override
+    public void setEndDate() {
+
+    }
 }

@@ -1,5 +1,6 @@
 package com.labwork2;
 
+import com.labwork2.candlestick.JfreeCandlestickChart;
 import com.labwork2.datasource.ApiExecutor;
 import com.labwork2.datasource.DataSourceBase;
 import com.labwork2.datasource.DownloadedDataBuffef;
@@ -12,6 +13,9 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.Region;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.fx.ChartViewer;
+import org.jfree.data.xy.XYDataset;
 
 import java.util.ArrayList;
 
@@ -46,9 +50,11 @@ public class MainController {
     private ObservableList<String> dataSourceOList;
     private DataSourceBase data;
     private ArrayList<String> marketList;
-    private ObservableList<String> marketListOList;
+    private ObservableList<String> marketOList;
     private ArrayList<String> quoteList;
-    private ObservableList<String> quoteListOList;
+    private ObservableList<String> quoteOList;
+    private ArrayList<String> intervalList;
+    private ObservableList<String> intervalOList;
     //Flags
     boolean isDSCBinit = false;
 
@@ -91,32 +97,48 @@ public class MainController {
         progressIndicator.setProgress(0.25);
         Runnable run = () -> {
             try {
+                double readyPercent = 0.3;
                 data.connect();
-                progressIndicator.setProgress(0.4);
+                progressIndicator.setProgress(readyPercent);
+                readyPercent+=0.1;
                 data.initElements();
-                progressIndicator.setProgress(0.6);
+                progressIndicator.setProgress(readyPercent);
+                readyPercent+=0.1;
                 marketList = data.getMarketList();
-                progressIndicator.setProgress(0.7);
-                quoteList = data.getQuotesList();
-                progressIndicator.setProgress(0.8);
-                marketListOList = ParseUtils.Split(marketList, ">");
-                progressIndicator.setProgress(0.9);
-                quoteListOList = ParseUtils.Split(quoteList, ">");
-                progressIndicator.setProgress(1.0);
+                progressIndicator.setProgress(readyPercent);
+                readyPercent+=0.1;
+                //quoteList = data.getQuotesList();
+                //progressIndicator.setProgress(readyPercent);
+                readyPercent+=0.1;
+                intervalList = data.getIntervalList();
+                progressIndicator.setProgress(readyPercent);
+                readyPercent+=0.1;
+                marketOList = FXCollections.observableList(marketList);//ParseUtils.Split(marketList, ">"); // need to cover it in getter
+                progressIndicator.setProgress(readyPercent);
+                readyPercent+=0.1;
+                //quoteOList = FXCollections.observableList(quoteList);//ParseUtils.Split(quoteList, ">"); // need to cover it in getter
+                progressIndicator.setProgress(readyPercent);
+                readyPercent+=0.1;
+                intervalOList = FXCollections.observableList(intervalList);//ParseUtils.Split(intervalList, ">"); // need to cover it in getter
+                progressIndicator.setProgress(readyPercent);
             } catch (Exception e) {
                 infoLabel.setText("INFO:" + "Can't connect. Problem:" + e.getMessage());
-                connectionLabel.setText("Not connected");
+                //connectionLabel.setText("Not connected");
                 progressIndicator.setProgress(0.0);
                 setElementDisable(false);
                 return;
             }
-            connectionLabel.setText("Connected");
-            marketCB.setItems(marketListOList);
-            quoteCB.setItems(quoteListOList);
+            //connectionLabel.setText("Connected");
+            marketCB.setItems(marketOList);
+            //quoteCB.setItems(quoteOList);
             setElementDisable(false);
+            //JfreeCandlestickChart obj = new JfreeCandlestickChart("title");
+            //JFreeChart chart = obj.createChart("dataset");
+            //mainChartRegion = new ChartViewer(chart);
         };
         Thread myThread = new Thread(run, "DataThread");
         myThread.start();
+        //JfreeCandlestickChart chart = new JfreeCandlestickChart("hello");
     }
 
     private void setElementDisable(boolean isDisable) {
@@ -135,4 +157,50 @@ public class MainController {
         Platform.exit();
     }
 
+    public void setMarketValue() {
+        var marketCBValue = (String)marketCB.getValue();
+        boolean isFound = false;
+        for(int i=0;i<marketList.size();++i){
+            if(marketList.get(i).contains(marketCBValue)){
+                marketCBValue = marketList.get(i);
+                isFound=true;
+                break;
+            }
+        }
+        if(isFound) {
+            try
+            {
+                data.setMarket(marketCBValue, marketList.size());
+                quoteList = data.getQuotesList();
+                quoteOList = FXCollections.observableList(quoteList);//ParseUtils.Split(quoteList, ">");
+                quoteCB.setItems(quoteOList);
+            }
+            catch(Exception e){
+                infoLabel.setText("INFO:" + "Can't connect. Problem:" + e.getMessage());
+            }
+        }
+    }
+    public void setQuoteValue(){
+        var quoteCBValue = (String) quoteCB.getValue();
+        boolean isFound = false;
+        for(int i=0;i<quoteList.size();++i){
+            if(quoteList.get(i).contains(quoteCBValue)){
+                quoteCBValue = quoteList.get(i);
+                isFound=true;
+                break;
+            }
+        }
+        if(isFound) {
+            try
+            {
+                data.setQuote(quoteCBValue, quoteList.size());
+                //quoteList = data.getQuotesList();
+                //quoteOList = FXCollections.observableList(quoteList);//ParseUtils.Split(quoteList, ">");
+                //quoteCB.setItems(quoteOList);
+            }
+            catch(Exception e){
+                infoLabel.setText("INFO:" + "Can't connect. Problem:" + e.getMessage());
+            }
+        }
+    }
 }

@@ -57,14 +57,14 @@ public class JfreeCandlestickChart extends JPanel {
         final JFreeChart candlestickChart = createChart(title);
         // Create new chart panel
         final ChartPanel chartPanel = new ChartPanel(candlestickChart);
-       // chartPanel.setPreferredSize(new java.awt.Dimension(1400, 500));
+        //chartPanel.setPreferredSize(new java.awt.Dimension(1400, 500));
         // Enable zooming
         chartPanel.setMouseZoomable(true);
         chartPanel.setMouseWheelEnabled(true);
-      //  add(chartPanel, BorderLayout.CENTER);
+        //add(chartPanel, BorderLayout.CENTER);
     }
 
-    private JFreeChart createChart(String chartTitle) {
+    public JFreeChart createChart(String chartTitle) {
 
         /**
          * Creating candlestick subplot
@@ -131,7 +131,7 @@ public class JfreeCandlestickChart extends JPanel {
      *
      * @param t the t
      */
-    public void addCandel(long time, double o, double h, double l, double c, long v) {
+    public void addCandle(long time, double o, double h, double l, double c, long v) {
         try {
             // Add bar to the data. Let's repeat the same bar
             FixedMillisecond t = new FixedMillisecond(
@@ -157,7 +157,7 @@ public class JfreeCandlestickChart extends JPanel {
                 // Set the period close price
                 close = MathUtils.roundDouble(price, MathUtils.TWO_DEC_DOUBLE_FORMAT);
                 // Add new candle
-                addCandel(time, open, high, low, close, volume);
+                addCandle(time, open, high, low, close, volume);
                 // Reset the intervalFirstPrint to null
                 candelChartIntervalFirstPrint = null;
             } else {

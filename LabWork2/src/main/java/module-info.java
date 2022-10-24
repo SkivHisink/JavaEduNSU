@@ -10,6 +10,7 @@ module com.example.labwork2 {
     requires Java.WebSocket;
     requires org.jfree.jfreechart;
     requires java.desktop;
+    requires org.jfree.chart.fx;
 
     opens com.labwork2 to javafx.fxml;
     exports com.labwork2;

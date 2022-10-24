@@ -1,5 +1,6 @@
 package com.labwork2.datasource;
 
+import com.labwork2.utils.ParseUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -124,37 +125,55 @@ public class FinamSelenium extends DataSourceBase {
 
     @Override
     public ArrayList<String> getMarketList() throws Exception {
-        return getList(marketComboBoxList);
+        return ParseUtils.SplitAr(getList(marketComboBoxList), ">");
     }
 
     public ArrayList<String> getQuotesList() throws Exception {
-        return getList(quotesComboBoxList);
+        return ParseUtils.SplitAr(getList(quotesComboBoxList), ">");
+    }
+
+    @Override
+    public ArrayList<String> getIntervalList() throws Exception {
+        return ParseUtils.SplitAr(getList(intervalComboBoxList), ">");
     }
 
     private void setComboBoxValue(String varName, int comboboxSize, List<WebElement> comboBoxList, WebElement button) throws Exception {
         checkFlags();
         button.click();
         for (int i = 0; i < comboboxSize; ++i) {
-            if (comboBoxList.get(i).getAttribute("innerHTML").equals(varName)) {
+            if (comboBoxList.get(i).getAttribute("innerHTML").contains(varName)) {
                 comboBoxList.get(i).click();
                 break;
             }
         }
     }
 
+    @Override
     public void setMarket(String marketName, int marketNumber) throws Exception {
         setComboBoxValue(marketName, marketNumber, marketComboBoxList, buttonToOpenMarketCB);
+        buttonToOpenMarketCB = driver.findElement(By.className("finam-ui-quote-selector-market")).
+                findElement(By.className("finam-ui-quote-selector-arrow"));
+        quotesComboBoxList = marketDropDownList.get(1).findElement(By.xpath("./div")).
+                findElement(By.xpath("./ul")).findElements(By.xpath("./li"));
+        buttonToOpenQuoteCB = driver.findElement(By.className("finam-ui-quote-selector-quote")).
+                findElement(By.className("finam-ui-quote-selector-arrow"));
     }
 
-
+    @Override
     public void setQuote(String quoteName, int quoteNumber) throws Exception {
         setComboBoxValue(quoteName, quoteNumber, quotesComboBoxList, buttonToOpenQuoteCB);
     }
 
-    public void setBeginDate() {
-
+    @Override
+    public void setInterval(String intervalName, int intervalNumber) throws Exception {
+        setComboBoxValue(intervalName, intervalNumber, intervalComboBoxList, buttonToOpenIntervalCB);
     }
 
+    @Override
+    public void setBeginDate() {
+    }
+
+    @Override
     public void setEndDate() {
 
     }

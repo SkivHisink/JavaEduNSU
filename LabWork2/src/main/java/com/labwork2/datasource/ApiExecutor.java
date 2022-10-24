@@ -76,6 +76,36 @@ public class ApiExecutor extends DataSourceBase{
     public ArrayList<String> getQuotesList() throws Exception {
         return null;
     }
+
+    @Override
+    public ArrayList<String> getIntervalList() throws Exception {
+        return null;
+    }
+
+    @Override
+    public void setMarket(String marketName, int marketNumber) throws Exception {
+
+    }
+
+    @Override
+    public void setQuote(String quoteName, int quoteNumber) throws Exception {
+
+    }
+
+    @Override
+    public void setInterval(String intervalName, int intervalNumber) throws Exception {
+
+    }
+
+    @Override
+    public void setBeginDate() {
+
+    }
+
+    @Override
+    public void setEndDate() {
+
+    }
     // don't have RU market
     //executePost("http://api.marketstack.com/v1/eod?access_key=854e02f58534616ef44487c12ab2d1cf&symbols=AAPL", "symbols=AAPL");
     // don't have RU market
