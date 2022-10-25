@@ -56,7 +56,7 @@
             <Font name="Times New Roman" size="14.0" />
          </font>
       </Label>
-      <Button id="GetDataButton" fx:id="getDataButton" disable="true" layoutX="691.0" layoutY="107.0" mnemonicParsing="false" text="Get data" />
+      <Button id="GetDataButton" fx:id="getDataButton" disable="true" layoutX="693.0" layoutY="115.0" mnemonicParsing="false" onAction="#onGetDataButton" text="Get data" />
       <Label layoutX="32.0" layoutY="49.0" text="Market">
          <font>
             <Font name="Times New Roman" size="14.0" />

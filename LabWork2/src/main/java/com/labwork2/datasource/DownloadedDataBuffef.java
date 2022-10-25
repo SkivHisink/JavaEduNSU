@@ -52,4 +52,19 @@ public class DownloadedDataBuffef extends DataSourceBase {
     public void setEndDate() {
 
     }
+
+    @Override
+    public void getData() {
+
+    }
+
+    @Override
+    public void setBeginData(int day, int month, int year) {
+
+    }
+
+    @Override
+    public void setEndData(int day, int month, int year) {
+
+    }
 }

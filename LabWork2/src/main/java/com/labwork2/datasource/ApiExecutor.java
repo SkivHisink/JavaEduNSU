@@ -106,6 +106,21 @@ public class ApiExecutor extends DataSourceBase{
     public void setEndDate() {
 
     }
+
+    @Override
+    public void getData() {
+
+    }
+
+    @Override
+    public void setBeginData(int day, int month, int year) {
+
+    }
+
+    @Override
+    public void setEndData(int day, int month, int year) {
+
+    }
     // don't have RU market
     //executePost("http://api.marketstack.com/v1/eod?access_key=854e02f58534616ef44487c12ab2d1cf&symbols=AAPL", "symbols=AAPL");
     // don't have RU market

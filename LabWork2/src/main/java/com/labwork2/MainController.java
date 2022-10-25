@@ -100,25 +100,25 @@ public class MainController {
                 double readyPercent = 0.3;
                 data.connect();
                 progressIndicator.setProgress(readyPercent);
-                readyPercent+=0.1;
+                readyPercent += 0.1;
                 data.initElements();
                 progressIndicator.setProgress(readyPercent);
-                readyPercent+=0.1;
+                readyPercent += 0.1;
                 marketList = data.getMarketList();
                 progressIndicator.setProgress(readyPercent);
-                readyPercent+=0.1;
+                readyPercent += 0.1;
                 //quoteList = data.getQuotesList();
                 //progressIndicator.setProgress(readyPercent);
-                readyPercent+=0.1;
+                readyPercent += 0.1;
                 intervalList = data.getIntervalList();
                 progressIndicator.setProgress(readyPercent);
-                readyPercent+=0.1;
+                readyPercent += 0.1;
                 marketOList = FXCollections.observableList(marketList);//ParseUtils.Split(marketList, ">"); // need to cover it in getter
                 progressIndicator.setProgress(readyPercent);
-                readyPercent+=0.1;
+                readyPercent += 0.1;
                 //quoteOList = FXCollections.observableList(quoteList);//ParseUtils.Split(quoteList, ">"); // need to cover it in getter
                 progressIndicator.setProgress(readyPercent);
-                readyPercent+=0.1;
+                readyPercent += 0.1;
                 intervalOList = FXCollections.observableList(intervalList);//ParseUtils.Split(intervalList, ">"); // need to cover it in getter
                 progressIndicator.setProgress(readyPercent);
             } catch (Exception e) {
@@ -158,49 +158,78 @@ public class MainController {
     }
 
     public void setMarketValue() {
-        var marketCBValue = (String)marketCB.getValue();
-        boolean isFound = false;
-        for(int i=0;i<marketList.size();++i){
-            if(marketList.get(i).contains(marketCBValue)){
-                marketCBValue = marketList.get(i);
-                isFound=true;
-                break;
+        Runnable run = () -> {
+            setElementDisable(true);
+            var marketCBValue = (String) marketCB.getValue();
+            boolean isFound = false;
+            for (int i = 0; i < marketList.size(); ++i) {
+                if (marketList.get(i).contains(marketCBValue)) {
+                    marketCBValue = marketList.get(i);
+                    isFound = true;
+                    break;
+                }
             }
-        }
-        if(isFound) {
-            try
-            {
-                data.setMarket(marketCBValue, marketList.size());
-                quoteList = data.getQuotesList();
-                quoteOList = FXCollections.observableList(quoteList);//ParseUtils.Split(quoteList, ">");
-                quoteCB.setItems(quoteOList);
+            if (isFound) {
+                try {
+                    data.setMarket(marketCBValue, marketList.size());
+                    quoteList = data.getQuotesList();
+                    quoteOList = FXCollections.observableList(quoteList);//ParseUtils.Split(quoteList, ">");
+                    quoteCB.setItems(quoteOList);
+                } catch (Exception e) {
+                    infoLabel.setText("INFO:" + "Can't connect. Problem:" + e.getMessage());
+                }
             }
-            catch(Exception e){
-                infoLabel.setText("INFO:" + "Can't connect. Problem:" + e.getMessage());
-            }
-        }
+            setElementDisable(false);
+        };
+        Thread myThread = new Thread(run, "MarketThread");
+        myThread.start();
     }
-    public void setQuoteValue(){
-        var quoteCBValue = (String) quoteCB.getValue();
-        boolean isFound = false;
-        for(int i=0;i<quoteList.size();++i){
-            if(quoteList.get(i).contains(quoteCBValue)){
-                quoteCBValue = quoteList.get(i);
-                isFound=true;
-                break;
-            }
+
+    public void setQuoteValue() {
+        if (quoteCB.getValue() == null) {
+            setElementDisable(false);
+            return;
         }
-        if(isFound) {
-            try
-            {
-                data.setQuote(quoteCBValue, quoteList.size());
-                //quoteList = data.getQuotesList();
-                //quoteOList = FXCollections.observableList(quoteList);//ParseUtils.Split(quoteList, ">");
-                //quoteCB.setItems(quoteOList);
+        Runnable run = () -> {
+            setElementDisable(true);
+            var quoteCBValue = (String) quoteCB.getValue();
+            boolean isFound = false;
+
+            for (int i = 0; i < quoteList.size(); ++i) {
+                if (quoteList.get(i).contains(quoteCBValue)) {
+                    quoteCBValue = quoteList.get(i);
+                    isFound = true;
+                    break;
+                }
             }
-            catch(Exception e){
-                infoLabel.setText("INFO:" + "Can't connect. Problem:" + e.getMessage());
+            if (isFound) {
+                try {
+                    data.setQuote(quoteCBValue, quoteList.size());
+                } catch (Exception e) {
+                    infoLabel.setText("INFO:" + "Can't connect. Problem:" + e.getMessage());
+                }
             }
+            setElementDisable(false);
+        };
+        Thread myThread = new Thread(run, "QuoteThread");
+        myThread.start();
+    }
+
+    @FXML
+    public void onGetDataButton() {
+        try {
+            var beginDate = ((String) beginDateTF.getText()).split("\\.");
+            data.setBeginData(Integer.parseInt(beginDate[0]),
+                    Integer.parseInt(beginDate[1])-1,
+                    Integer.parseInt(beginDate[2]));
+            var endDate = ((String) endDateTF.getText()).split(".");
+            data.setEndData(Integer.parseInt(endDate[0]),
+                    Integer.parseInt(endDate[1])-1,
+                    Integer.parseInt(endDate[2]));
         }
+        catch(Exception e){
+            infoLabel.setText("INFO:"+"Wrong date. Please check date.");
+        }
+        data.getData();
     }
 }

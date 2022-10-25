@@ -2,12 +2,13 @@ package com.labwork2.datasource;
 
 import com.labwork2.utils.ParseUtils;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.CapabilityType;
-
+import org.openqa.selenium.support.ui;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -95,9 +96,7 @@ public class FinamSelenium extends DataSourceBase {
         }
     }
 
-    @Override
-    public void initElements() throws Exception {
-        checkFlags(false);
+    private void updateAllVariables() {
         marketDropDownList = driver.findElements(By.className("finam-ui-dropdown-list"));
         marketComboBoxList = marketDropDownList.get(0).findElement(By.xpath("./div")).
                 findElement(By.xpath("./ul")).findElements(By.xpath("./li"));
@@ -111,6 +110,12 @@ public class FinamSelenium extends DataSourceBase {
                 findElement(By.className("finam-ui-quote-selector-arrow"));
         buttonToOpenIntervalCB = driver.findElement(By.className("finam-ui-controls-select")).
                 findElement(By.className("finam-ui-controls-select-arrow"));
+    }
+
+    @Override
+    public void initElements() throws Exception {
+        checkFlags(false);
+        updateAllVariables();
         isInited = true;
     }
 
@@ -162,6 +167,8 @@ public class FinamSelenium extends DataSourceBase {
     @Override
     public void setQuote(String quoteName, int quoteNumber) throws Exception {
         setComboBoxValue(quoteName, quoteNumber, quotesComboBoxList, buttonToOpenQuoteCB);
+        Thread.sleep(500);
+        updateAllVariables();
     }
 
     @Override
@@ -188,7 +195,45 @@ public class FinamSelenium extends DataSourceBase {
 
     }
 
+    @Override
     public void getData() {
+        WebElement submitButton = driver.findElement(By.id("issuer-profile-export-button"));
+        WebElement filename = driver.findElement(By.id("issuer-profile-export-file-name"));
+        var val = filename.getAttribute("value");
+        if (driver instanceof JavascriptExecutor) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", submitButton);
+        } else {
+            throw new IllegalStateException("This driver does not support JavaScript!");
+        }
+    }
 
+    @Override
+    public void setBeginData(int day, int month, int year){
+        var buttonDate = driver.findElement(By.id("issuer-profile-export-from"));
+        buttonDate.click();
+        var comboBoxMonth = driver.findElement(By.className("ui-datepicker-month"));
+        comboBoxMonth.click();
+        Select select= new Select(comboBoxMonth);
+        var dayWeb = driver.findElement(By.id("issuer-profile-export-from-d"));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('type', '');", dayWeb);
+        dayWeb.sendKeys("value", Integer.toString(day));
+        var monthWeb = driver.findElement(By.id("issuer-profile-export-from-m"));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('type', '');", monthWeb);
+        monthWeb.sendKeys("value", Integer.toString(month));
+        var yearWeb = driver.findElement(By.id("issuer-profile-export-from-y"));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('type', '');", yearWeb);
+        yearWeb.sendKeys("value", Integer.toString(year));
+    }
+    @Override
+    public  void setEndData(int day, int month, int year){
+        var dayWeb = driver.findElement(By.id("issuer-profile-export-to-d"));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('type', '');", dayWeb);
+        dayWeb.sendKeys("value", Integer.toString(day));
+        var monthWeb = driver.findElement(By.id("issuer-profile-export-to-m"));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('type', '');", monthWeb);
+        monthWeb.sendKeys("value", Integer.toString(month));
+        var yearWeb = driver.findElement(By.id("issuer-profile-export-to-y"));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('type', '');", yearWeb);
+        yearWeb.sendKeys("value", Integer.toString(year));
     }
 }

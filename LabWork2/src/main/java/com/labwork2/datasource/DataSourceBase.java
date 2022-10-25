@@ -13,4 +13,7 @@ public abstract class DataSourceBase {
     public abstract void setInterval(String intervalName, int intervalNumber) throws Exception;
     public abstract void setBeginDate();
     public abstract void setEndDate();
+    public abstract void getData();
+    public abstract void setBeginData(int day, int month, int year);
+    public abstract void setEndData(int day, int month, int year);
 }
