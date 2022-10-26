@@ -8,7 +8,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.support.ui;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -62,6 +61,10 @@ public class FinamSelenium extends DataSourceBase {
     public FinamSelenium() {
         stdOptionsInit();
         driver = new ChromeDriver(options);
+        initMarket = "МосБиржа акции";
+        initQuote = "ГАЗПРОМ ао";
+        initContract = "GAZP";
+        initInterval = "1 час";
     }
 
     @Override
@@ -108,8 +111,7 @@ public class FinamSelenium extends DataSourceBase {
                 findElement(By.className("finam-ui-quote-selector-arrow"));
         buttonToOpenQuoteCB = driver.findElement(By.className("finam-ui-quote-selector-quote")).
                 findElement(By.className("finam-ui-quote-selector-arrow"));
-        buttonToOpenIntervalCB = driver.findElement(By.className("finam-ui-controls-select")).
-                findElement(By.className("finam-ui-controls-select-arrow"));
+        buttonToOpenIntervalCB = driver.findElement(By.className("finam-ui-controls-select"));
     }
 
     @Override
@@ -122,7 +124,7 @@ public class FinamSelenium extends DataSourceBase {
     private ArrayList<String> getList(List<WebElement> comboBoxList) throws Exception {
         checkFlags();
         var resultList = new ArrayList<String>();
-        for (int i = 0; i < comboBoxList.size(); ++i) {
+        for (int i = 0; i < comboBoxList.size(); ++i) { // we need multithreading
             resultList.add(comboBoxList.get(i).getAttribute("innerHTML"));
         }
         return resultList;
@@ -162,6 +164,7 @@ public class FinamSelenium extends DataSourceBase {
                 findElement(By.xpath("./ul")).findElements(By.xpath("./li"));
         buttonToOpenQuoteCB = driver.findElement(By.className("finam-ui-quote-selector-quote")).
                 findElement(By.className("finam-ui-quote-selector-arrow"));
+        buttonToOpenIntervalCB = driver.findElement(By.className("finam-ui-controls-select"));
     }
 
     @Override
@@ -184,13 +187,6 @@ public class FinamSelenium extends DataSourceBase {
     public void setEndDate() {
 
     }
-
-    public ArrayList<String> getDataSteps() {
-        var result = new ArrayList<String>();
-        //
-        return result;
-    }
-
     public void setDataStep() {
 
     }
@@ -199,7 +195,8 @@ public class FinamSelenium extends DataSourceBase {
     public void getData() {
         WebElement submitButton = driver.findElement(By.id("issuer-profile-export-button"));
         WebElement filename = driver.findElement(By.id("issuer-profile-export-file-name"));
-        var val = filename.getAttribute("value");
+        var filepath = filename.getAttribute("value");
+
         if (driver instanceof JavascriptExecutor) {
             ((JavascriptExecutor) driver).executeScript("arguments[0].click();", submitButton);
         } else {
@@ -209,31 +206,39 @@ public class FinamSelenium extends DataSourceBase {
 
     @Override
     public void setBeginData(int day, int month, int year){
-        var buttonDate = driver.findElement(By.id("issuer-profile-export-from"));
-        buttonDate.click();
-        var comboBoxMonth = driver.findElement(By.className("ui-datepicker-month"));
-        comboBoxMonth.click();
-        Select select= new Select(comboBoxMonth);
         var dayWeb = driver.findElement(By.id("issuer-profile-export-from-d"));
         ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('type', '');", dayWeb);
-        dayWeb.sendKeys("value", Integer.toString(day));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('value', arguments[1]);", dayWeb, day);
+        dayWeb.clear();
+        dayWeb.sendKeys( Integer.toString(day));
         var monthWeb = driver.findElement(By.id("issuer-profile-export-from-m"));
         ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('type', '');", monthWeb);
-        monthWeb.sendKeys("value", Integer.toString(month));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('value', arguments[1]);", monthWeb, month);
+        monthWeb.clear();
+        monthWeb.sendKeys(Integer.toString(month));
         var yearWeb = driver.findElement(By.id("issuer-profile-export-from-y"));
         ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('type', '');", yearWeb);
-        yearWeb.sendKeys("value", Integer.toString(year));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('value', arguments[1]);", yearWeb, year);
+        yearWeb.clear();
+        yearWeb.sendKeys(Integer.toString(year));
     }
     @Override
     public  void setEndData(int day, int month, int year){
         var dayWeb = driver.findElement(By.id("issuer-profile-export-to-d"));
         ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('type', '');", dayWeb);
-        dayWeb.sendKeys("value", Integer.toString(day));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('value', arguments[1]);", dayWeb, day);
+        dayWeb.clear();
+        dayWeb.sendKeys(Integer.toString(day));
         var monthWeb = driver.findElement(By.id("issuer-profile-export-to-m"));
         ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('type', '');", monthWeb);
-        monthWeb.sendKeys("value", Integer.toString(month));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('value', arguments[1]);", monthWeb, month);
+        monthWeb.clear();
+        monthWeb.sendKeys(Integer.toString(month));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('value', arguments[1]);", monthWeb, month);
         var yearWeb = driver.findElement(By.id("issuer-profile-export-to-y"));
         ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('type', '');", yearWeb);
-        yearWeb.sendKeys("value", Integer.toString(year));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('value', arguments[1]);", yearWeb, year);
+        yearWeb.clear();
+        yearWeb.sendKeys(Integer.toString(year));
     }
 }

@@ -13,9 +13,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.Region;
-import org.jfree.chart.JFreeChart;
 import org.jfree.chart.fx.ChartViewer;
-import org.jfree.data.xy.XYDataset;
 
 import java.util.ArrayList;
 
@@ -45,6 +43,8 @@ public class MainController {
     TextField beginDateTF;
     @FXML
     TextField endDateTF;
+    @FXML
+    Label contractLabel;
     // support GUI objects
     private ArrayList<String> dataSourceList;
     private ObservableList<String> dataSourceOList;
@@ -107,8 +107,8 @@ public class MainController {
                 marketList = data.getMarketList();
                 progressIndicator.setProgress(readyPercent);
                 readyPercent += 0.1;
-                //quoteList = data.getQuotesList();
-                //progressIndicator.setProgress(readyPercent);
+                quoteList = data.getQuotesList();
+                progressIndicator.setProgress(readyPercent);
                 readyPercent += 0.1;
                 intervalList = data.getIntervalList();
                 progressIndicator.setProgress(readyPercent);
@@ -116,7 +116,7 @@ public class MainController {
                 marketOList = FXCollections.observableList(marketList);//ParseUtils.Split(marketList, ">"); // need to cover it in getter
                 progressIndicator.setProgress(readyPercent);
                 readyPercent += 0.1;
-                //quoteOList = FXCollections.observableList(quoteList);//ParseUtils.Split(quoteList, ">"); // need to cover it in getter
+                quoteOList = FXCollections.observableList(quoteList);//ParseUtils.Split(quoteList, ">"); // need to cover it in getter
                 progressIndicator.setProgress(readyPercent);
                 readyPercent += 0.1;
                 intervalOList = FXCollections.observableList(intervalList);//ParseUtils.Split(intervalList, ">"); // need to cover it in getter
@@ -130,7 +130,8 @@ public class MainController {
             }
             //connectionLabel.setText("Connected");
             marketCB.setItems(marketOList);
-            //quoteCB.setItems(quoteOList);
+            intervalCB.setItems(intervalOList);
+            quoteCB.setItems(quoteOList);
             setElementDisable(false);
             //JfreeCandlestickChart obj = new JfreeCandlestickChart("title");
             //JFreeChart chart = obj.createChart("dataset");
@@ -138,7 +139,11 @@ public class MainController {
         };
         Thread myThread = new Thread(run, "DataThread");
         myThread.start();
-        //JfreeCandlestickChart chart = new JfreeCandlestickChart("hello");
+        quoteCB.setValue(data.initQuote);
+        marketCB.setValue(data.initMarket);
+        intervalCB.setValue(data.initInterval);
+        JfreeCandlestickChart chart = new JfreeCandlestickChart("hello");
+        //mainChartRegion.setChart(chart.createChart("heh"));
     }
 
     private void setElementDisable(boolean isDisable) {
@@ -150,6 +155,7 @@ public class MainController {
         endDateTF.setDisable(isDisable);
         getDataButton.setDisable(isDisable);
         intervalCB.setDisable(isDisable);
+        contractLabel.setDisable(isDisable);
     }
 
     @FXML
@@ -158,6 +164,9 @@ public class MainController {
     }
 
     public void setMarketValue() {
+        if(marketList == null){
+            return;
+        }
         Runnable run = () -> {
             setElementDisable(true);
             var marketCBValue = (String) marketCB.getValue();
@@ -186,6 +195,9 @@ public class MainController {
     }
 
     public void setQuoteValue() {
+        if(quoteList == null){
+            return;
+        }
         if (quoteCB.getValue() == null) {
             setElementDisable(false);
             return;
@@ -214,7 +226,29 @@ public class MainController {
         Thread myThread = new Thread(run, "QuoteThread");
         myThread.start();
     }
-
+@FXML
+public void setIntervalValue(){
+    if(intervalList == null){
+        return;
+    }
+    if (intervalCB.getValue() == null) {
+        setElementDisable(false);
+        return;
+    }
+    Runnable run = () -> {
+        setElementDisable(true);
+        try {
+            data.setInterval((String) intervalCB.getValue(), intervalList.size());
+        }
+        catch(Exception e)
+        {
+            //ehhh
+        }
+        setElementDisable(false);
+    };
+    Thread myThread = new Thread(run, "IntervalThread");
+    myThread.start();
+}
     @FXML
     public void onGetDataButton() {
         try {
@@ -222,7 +256,7 @@ public class MainController {
             data.setBeginData(Integer.parseInt(beginDate[0]),
                     Integer.parseInt(beginDate[1])-1,
                     Integer.parseInt(beginDate[2]));
-            var endDate = ((String) endDateTF.getText()).split(".");
+            var endDate = ((String) endDateTF.getText()).split("\\.");
             data.setEndData(Integer.parseInt(endDate[0]),
                     Integer.parseInt(endDate[1])-1,
                     Integer.parseInt(endDate[2]));

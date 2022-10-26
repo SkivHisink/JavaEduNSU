@@ -1,9 +1,11 @@
 package com.labwork2;
 
+import com.labwork2.candlestick.JfreeCandlestickChart;
 import com.labwork2.datasource.FinamSelenium;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.jfree.chart.fx.ChartViewer;
 
 import java.io.*;
 import java.net.HttpURLConnection;

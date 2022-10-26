@@ -42,7 +42,7 @@
             <Font name="Times New Roman" size="14.0" />
          </font>
       </Label>
-      <ComboBox id="IntervalComboBox" fx:id="intervalCB" disable="true" layoutX="87.0" layoutY="115.0" prefWidth="150.0" promptText="None" />
+      <ComboBox id="IntervalComboBox" fx:id="intervalCB" disable="true" layoutX="87.0" layoutY="115.0" onAction="#setIntervalValue" prefWidth="150.0" promptText="None" />
       <Region id="MainChartRegion" fx:id="mainChartRegion" layoutX="14.0" layoutY="153.0" prefHeight="400.0" prefWidth="750.0" />
       <ProgressIndicator id="ConnectionStatusBar" fx:id="progressIndicator" layoutX="638.0" layoutY="16.0" progress="0.0" />
       <Label id="ConnectionStatusLabel" fx:id="connectionLabel" layoutX="670.0" layoutY="20.0" text="Not Connected">
@@ -69,5 +69,15 @@
          </font>
       </Label>
       <ComboBox id="QuoteComboBox" fx:id="quoteCB" disable="true" layoutX="333.0" layoutY="44.0" onAction="#setQuoteValue" prefWidth="150.0" promptText="None" />
+      <Label layoutX="492.0" layoutY="49.0" text="Contract">
+         <font>
+            <Font name="Times New Roman" size="14.0" />
+         </font>
+      </Label>
+      <Label fx:id="contractLabel" disable="true" layoutX="548.0" layoutY="49.0" text="None" underline="true">
+         <font>
+            <Font name="Times New Roman" size="14.0" />
+         </font>
+      </Label>
    </children>
 </AnchorPane>
