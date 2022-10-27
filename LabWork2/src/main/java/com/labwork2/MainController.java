@@ -260,10 +260,10 @@ public void setIntervalValue(){
             data.setEndData(Integer.parseInt(endDate[0]),
                     Integer.parseInt(endDate[1])-1,
                     Integer.parseInt(endDate[2]));
+            data.getData();
         }
         catch(Exception e){
             infoLabel.setText("INFO:"+"Wrong date. Please check date.");
         }
-        data.getData();
     }
 }

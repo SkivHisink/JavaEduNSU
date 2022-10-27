@@ -8,10 +8,15 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.CapabilityType;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import org.apache.commons.io.IOUtils;
 
 public class FinamSelenium extends DataSourceBase {
     //Driver and its trinkets
@@ -35,6 +40,7 @@ public class FinamSelenium extends DataSourceBase {
 
     // driver init
     public FinamSelenium(ChromeOptions options) {
+        data= new ArrayList<>();
         driver = new ChromeDriver(options);
     }
 
@@ -59,6 +65,7 @@ public class FinamSelenium extends DataSourceBase {
 
     // driver init by std options
     public FinamSelenium() {
+        data= new ArrayList<>();
         stdOptionsInit();
         driver = new ChromeDriver(options);
         initMarket = "МосБиржа акции";
@@ -192,11 +199,20 @@ public class FinamSelenium extends DataSourceBase {
     }
 
     @Override
-    public void getData() {
+    public void getData() throws Exception{
         WebElement submitButton = driver.findElement(By.id("issuer-profile-export-button"));
         WebElement filename = driver.findElement(By.id("issuer-profile-export-file-name"));
-        var filepath = filename.getAttribute("value");
-
+        submitButton.click();
+        var filepath = filename.getAttribute("value")+".txt";
+        String data = null;
+        var file = new File(filepath);
+        try(FileInputStream inputStream = new FileInputStream(file)) {
+            data = IOUtils.toString(inputStream, "UTF-8");
+        }
+        catch(Exception e){
+            data = null;
+        }
+        file.delete();
         if (driver instanceof JavascriptExecutor) {
             ((JavascriptExecutor) driver).executeScript("arguments[0].click();", submitButton);
         } else {

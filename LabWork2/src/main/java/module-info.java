@@ -11,6 +11,7 @@ module com.example.labwork2 {
     requires org.jfree.jfreechart;
     requires java.desktop;
     requires org.jfree.chart.fx;
+    requires org.apache.commons.io;
 
     opens com.labwork2 to javafx.fxml;
     exports com.labwork2;
