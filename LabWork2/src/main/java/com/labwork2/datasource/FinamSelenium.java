@@ -1,5 +1,6 @@
 package com.labwork2.datasource;
 
+import com.labwork2.common.FinamDataParser;
 import com.labwork2.utils.ParseUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -16,6 +17,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
 import org.apache.commons.io.IOUtils;
 
 public class FinamSelenium extends DataSourceBase {
@@ -40,7 +42,7 @@ public class FinamSelenium extends DataSourceBase {
 
     // driver init
     public FinamSelenium(ChromeOptions options) {
-        data= new ArrayList<>();
+        data = new ArrayList<>();
         driver = new ChromeDriver(options);
     }
 
@@ -65,7 +67,7 @@ public class FinamSelenium extends DataSourceBase {
 
     // driver init by std options
     public FinamSelenium() {
-        data= new ArrayList<>();
+        data = new ArrayList<>();
         stdOptionsInit();
         driver = new ChromeDriver(options);
         initMarket = "МосБиржа акции";
@@ -194,39 +196,39 @@ public class FinamSelenium extends DataSourceBase {
     public void setEndDate() {
 
     }
+
     public void setDataStep() {
 
     }
 
     @Override
-    public void getData() throws Exception{
+    public void getData() throws Exception {
         WebElement submitButton = driver.findElement(By.id("issuer-profile-export-button"));
         WebElement filename = driver.findElement(By.id("issuer-profile-export-file-name"));
-        submitButton.click();
-        var filepath = filename.getAttribute("value")+".txt";
-        String data = null;
-        var file = new File(filepath);
-        try(FileInputStream inputStream = new FileInputStream(file)) {
-            data = IOUtils.toString(inputStream, "UTF-8");
-        }
-        catch(Exception e){
-            data = null;
-        }
-        file.delete();
         if (driver instanceof JavascriptExecutor) {
             ((JavascriptExecutor) driver).executeScript("arguments[0].click();", submitButton);
         } else {
             throw new IllegalStateException("This driver does not support JavaScript!");
         }
+        var filepath = filename.getAttribute("value") + ".txt";
+        String rawData = null;
+        var file = new File(filepath);
+        try (FileInputStream inputStream = new FileInputStream(file)) {
+            rawData = IOUtils.toString(inputStream, "UTF-8");
+        } catch (Exception e) {
+            rawData = null;
+        }
+        file.delete();
+        this.data = FinamDataParser.parse(rawData);
     }
 
     @Override
-    public void setBeginData(int day, int month, int year){
+    public void setBeginData(int day, int month, int year) {
         var dayWeb = driver.findElement(By.id("issuer-profile-export-from-d"));
         ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('type', '');", dayWeb);
         ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('value', arguments[1]);", dayWeb, day);
         dayWeb.clear();
-        dayWeb.sendKeys( Integer.toString(day));
+        dayWeb.sendKeys(Integer.toString(day));
         var monthWeb = driver.findElement(By.id("issuer-profile-export-from-m"));
         ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('type', '');", monthWeb);
         ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('value', arguments[1]);", monthWeb, month);
@@ -238,8 +240,9 @@ public class FinamSelenium extends DataSourceBase {
         yearWeb.clear();
         yearWeb.sendKeys(Integer.toString(year));
     }
+
     @Override
-    public  void setEndData(int day, int month, int year){
+    public void setEndData(int day, int month, int year) {
         var dayWeb = driver.findElement(By.id("issuer-profile-export-to-d"));
         ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('type', '');", dayWeb);
         ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('value', arguments[1]);", dayWeb, day);

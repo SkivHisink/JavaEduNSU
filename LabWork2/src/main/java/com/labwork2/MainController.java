@@ -11,8 +11,11 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.Region;
+import javafx.stage.Stage;
+import org.jfree.chart.JFreeChart;
 import org.jfree.chart.fx.ChartViewer;
 
 import java.util.ArrayList;
@@ -164,7 +167,7 @@ public class MainController {
     }
 
     public void setMarketValue() {
-        if(marketList == null){
+        if (marketList == null) {
             return;
         }
         Runnable run = () -> {
@@ -195,7 +198,7 @@ public class MainController {
     }
 
     public void setQuoteValue() {
-        if(quoteList == null){
+        if (quoteList == null) {
             return;
         }
         if (quoteCB.getValue() == null) {
@@ -226,44 +229,53 @@ public class MainController {
         Thread myThread = new Thread(run, "QuoteThread");
         myThread.start();
     }
-@FXML
-public void setIntervalValue(){
-    if(intervalList == null){
-        return;
-    }
-    if (intervalCB.getValue() == null) {
-        setElementDisable(false);
-        return;
-    }
-    Runnable run = () -> {
-        setElementDisable(true);
-        try {
-            data.setInterval((String) intervalCB.getValue(), intervalList.size());
+
+    @FXML
+    public void setIntervalValue() {
+        if (intervalList == null) {
+            return;
         }
-        catch(Exception e)
-        {
-            //ehhh
+        if (intervalCB.getValue() == null) {
+            setElementDisable(false);
+            return;
         }
-        setElementDisable(false);
-    };
-    Thread myThread = new Thread(run, "IntervalThread");
-    myThread.start();
-}
+        Runnable run = () -> {
+            setElementDisable(true);
+            try {
+                data.setInterval((String) intervalCB.getValue(), intervalList.size());
+            } catch (Exception e) {
+                //ehhh
+            }
+            setElementDisable(false);
+        };
+        Thread myThread = new Thread(run, "IntervalThread");
+        myThread.start();
+    }
+
     @FXML
     public void onGetDataButton() {
         try {
             var beginDate = ((String) beginDateTF.getText()).split("\\.");
             data.setBeginData(Integer.parseInt(beginDate[0]),
-                    Integer.parseInt(beginDate[1])-1,
+                    Integer.parseInt(beginDate[1]) - 1,
                     Integer.parseInt(beginDate[2]));
             var endDate = ((String) endDateTF.getText()).split("\\.");
             data.setEndData(Integer.parseInt(endDate[0]),
-                    Integer.parseInt(endDate[1])-1,
+                    Integer.parseInt(endDate[1]) - 1,
                     Integer.parseInt(endDate[2]));
             data.getData();
-        }
-        catch(Exception e){
-            infoLabel.setText("INFO:"+"Wrong date. Please check date.");
+            JfreeCandlestickChart temp = new JfreeCandlestickChart("heh");
+            for (int i = 0; i < data.data.size(); ++i) {
+                temp.onTrade(data.data.get(i));
+            }
+            JFreeChart chart = temp.createChart("heh");
+            ChartViewer viewer = new ChartViewer(chart);
+            Stage stage = new Stage();
+            stage.setScene(new Scene(viewer));
+            stage.setTitle("JFreeChart: TimeSeriesFXDemo1.java");
+            stage.show();
+        } catch (Exception e) {
+            infoLabel.setText("INFO:" + "Wrong date. Please check date.");
         }
     }
 }
