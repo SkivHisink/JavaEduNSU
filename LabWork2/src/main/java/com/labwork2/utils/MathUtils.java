@@ -11,6 +11,7 @@ public class MathUtils {
 
     public static final String TWO_DEC_DOUBLE_FORMAT = "##.00";
 
+    public static final String FOUR_DEC_DOUBLE_FORMAT = "##.0000";
     /**
      * Round double.
      *

@@ -31,8 +31,6 @@ import org.jfree.data.time.ohlc.OHLCSeriesCollection;
 
 /**
  * The Class JfreeCandlestickChart.
- *
- * 
  */
 @SuppressWarnings("serial")
 public class JfreeCandlestickChart extends JPanel {
@@ -42,7 +40,7 @@ public class JfreeCandlestickChart extends JPanel {
     private OHLCSeries ohlcSeries;
     private TimeSeries volumeSeries;
 
-    private static final int MIN = 60000;
+    public int MIN = 60000;
     // Every minute
     private int timeInterval = 1;
     private TradeData candelChartIntervalFirstPrint = null;
@@ -51,17 +49,24 @@ public class JfreeCandlestickChart extends JPanel {
     private double low = 0.0;
     private double high = 0.0;
     private long volume = 0;
+    private JFreeChart candlestickChart;
 
     public JfreeCandlestickChart(String title) {
         // Create new chart
-        final JFreeChart candlestickChart = createChart(title);
+        volumeSeries = new TimeSeries("Volume");
+        ohlcSeries = new OHLCSeries("Price");
+        //candlestickChart = createChart(title);
         // Create new chart panel
-        final ChartPanel chartPanel = new ChartPanel(candlestickChart);
+        //final ChartPanel chartPanel = new ChartPanel(candlestickChart);
         //chartPanel.setPreferredSize(new java.awt.Dimension(1400, 500));
         // Enable zooming
-        chartPanel.setMouseZoomable(true);
-        chartPanel.setMouseWheelEnabled(true);
+        //chartPanel.setMouseZoomable(true);
+        //chartPanel.setMouseWheelEnabled(true);
         //add(chartPanel, BorderLayout.CENTER);
+    }
+
+    public JFreeChart getCandlestickChart() {
+        return candlestickChart;
     }
 
     public JFreeChart createChart(String chartTitle) {
@@ -71,7 +76,6 @@ public class JfreeCandlestickChart extends JPanel {
          */
         // Create OHLCSeriesCollection as a price dataset for candlestick chart
         OHLCSeriesCollection candlestickDataset = new OHLCSeriesCollection();
-        ohlcSeries = new OHLCSeries("Price");
         candlestickDataset.addSeries(ohlcSeries);
         // Create candlestick chart priceAxis
         NumberAxis priceAxis = new NumberAxis("Price");
@@ -88,7 +92,6 @@ public class JfreeCandlestickChart extends JPanel {
          */
         // creates TimeSeriesCollection as a volume dataset for volume chart
         TimeSeriesCollection volumeDataset = new TimeSeriesCollection();
-        volumeSeries = new TimeSeries("Volume");
         volumeDataset.addSeries(volumeSeries);
         // Create volume chart volumeAxis
         NumberAxis volumeAxis = new NumberAxis("Volume");
@@ -155,19 +158,19 @@ public class JfreeCandlestickChart extends JPanel {
             long time = t.getTime();
             if (timeInterval == (int) ((time / MIN) - (candelChartIntervalFirstPrint.getTime() / MIN))) {
                 // Set the period close price
-                close = MathUtils.roundDouble(price, MathUtils.TWO_DEC_DOUBLE_FORMAT);
+                close = MathUtils.roundDouble(price, MathUtils.FOUR_DEC_DOUBLE_FORMAT);
                 // Add new candle
                 addCandle(time, open, high, low, close, volume);
                 // Reset the intervalFirstPrint to null
                 candelChartIntervalFirstPrint = null;
             } else {
                 // Set the current low price
-                if (MathUtils.roundDouble(price, MathUtils.TWO_DEC_DOUBLE_FORMAT) < low)
-                    low = MathUtils.roundDouble(price, MathUtils.TWO_DEC_DOUBLE_FORMAT);
+                if (MathUtils.roundDouble(price, MathUtils.FOUR_DEC_DOUBLE_FORMAT) < low)
+                    low = MathUtils.roundDouble(price, MathUtils.FOUR_DEC_DOUBLE_FORMAT);
 
                 // Set the current high price
-                if (MathUtils.roundDouble(price, MathUtils.TWO_DEC_DOUBLE_FORMAT) > high)
-                    high = MathUtils.roundDouble(price, MathUtils.TWO_DEC_DOUBLE_FORMAT);
+                if (MathUtils.roundDouble(price, MathUtils.FOUR_DEC_DOUBLE_FORMAT) > high)
+                    high = MathUtils.roundDouble(price, MathUtils.FOUR_DEC_DOUBLE_FORMAT);
 
                 volume += t.getVolume();
             }
@@ -175,14 +178,17 @@ public class JfreeCandlestickChart extends JPanel {
             // Set intervalFirstPrint
             candelChartIntervalFirstPrint = t;
             // the first trade price in the day (day open price)
-            open = MathUtils.roundDouble(price, MathUtils.TWO_DEC_DOUBLE_FORMAT);
+            open = MathUtils.roundDouble(price, MathUtils.FOUR_DEC_DOUBLE_FORMAT);
             // the interval low
-            low = MathUtils.roundDouble(price, MathUtils.TWO_DEC_DOUBLE_FORMAT);
+            low = MathUtils.roundDouble(price, MathUtils.FOUR_DEC_DOUBLE_FORMAT);
             // the interval high
-            high = MathUtils.roundDouble(price, MathUtils.TWO_DEC_DOUBLE_FORMAT);
+            high = MathUtils.roundDouble(price, MathUtils.FOUR_DEC_DOUBLE_FORMAT);
             // set the initial volume
             volume = t.getVolume();
         }
     }
 
+    public void setTimeInterval(int interval) {
+        timeInterval = interval;
+    }
 }

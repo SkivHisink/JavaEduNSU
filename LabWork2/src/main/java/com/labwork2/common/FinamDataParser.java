@@ -29,6 +29,7 @@ public class FinamDataParser {
                     temp[FinamConstants.DATE_IDX],
                     Double.parseDouble(temp[FinamConstants.HIGH_IDX]),
                             Double.parseDouble(temp[FinamConstants.LOW_IDX]));
+            result.add(tempData);
         }
         return result;
     }

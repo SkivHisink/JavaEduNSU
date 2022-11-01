@@ -265,10 +265,56 @@ public class MainController {
                     Integer.parseInt(endDate[2]));
             data.getData();
             JfreeCandlestickChart temp = new JfreeCandlestickChart("heh");
+            String interval = (String) intervalCB.getValue();
+            // ticks
+            if (interval.equals(intervalList.get(0))) {
+                temp.setTimeInterval(1);
+            }
+            // mins
+            else if (interval.equals(intervalList.get(1))) {
+                temp.setTimeInterval(1);
+            }
+            // 5 mins
+            else if (interval.equals(intervalList.get(2))) {
+                temp.setTimeInterval(5);
+            }
+            // 10 mins
+            else if (interval.equals(intervalList.get(3))) {
+                temp.setTimeInterval(10);
+            }
+            // 15 mins
+            else if (interval.equals(intervalList.get(4))) {
+                temp.setTimeInterval(15);
+            }
+            // 30 min
+            else if (interval.equals(intervalList.get(5))) {
+                temp.setTimeInterval(30);
+            }
+            // 1 hour
+            else if (interval.equals(intervalList.get(6))) {
+                temp.setTimeInterval(60);
+            }
+            // 1 day
+            else if (interval.equals(intervalList.get(7))) {
+                temp.setTimeInterval(60 * 24);
+            }
+            // 1 week
+            else if (interval.equals(intervalList.get(8))) {
+                temp.setTimeInterval(60 * 24 * 7);
+            }
+            // 1 month
+            else if (interval.equals(intervalList.get(9))) {
+                temp.setTimeInterval(60 * 24 * 7 * 4); // problemss
+            } else {
+                // something impossible happend
+            }
             for (int i = 0; i < data.data.size(); ++i) {
                 temp.onTrade(data.data.get(i));
             }
-            JFreeChart chart = temp.createChart("heh");
+            JFreeChart chart = temp.createChart((String) marketCB.getValue() + " " +
+                    (String) quoteCB.getValue() + " " +
+                    beginDateTF.getText() + "-" +
+                    endDateTF.getText());
             ChartViewer viewer = new ChartViewer(chart);
             Stage stage = new Stage();
             stage.setScene(new Scene(viewer));

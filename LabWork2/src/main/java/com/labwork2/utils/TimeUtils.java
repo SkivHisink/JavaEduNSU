@@ -15,9 +15,9 @@ public class TimeUtils {
      */
     public static long convertToMillisTime(String time) {
         long timeMillis = 0;
-        long hours = new Integer(time.substring(0, 1)).intValue();
-        long minutes = new Integer(time.substring(2, 3)).intValue();
-        long seconds = new Integer(time.substring(4, 5)).intValue();
+        long hours = new Integer(time.substring(0, 2)).intValue();
+        long minutes = new Integer(time.substring(2, 4)).intValue();
+        long seconds = new Integer(time.substring(4, 6)).intValue();
         long millis = 0;
         if (time.length() == 12) {
             millis = new Integer(time.substring(9, 12)).intValue();
