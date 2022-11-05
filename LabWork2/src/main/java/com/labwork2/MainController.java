@@ -13,11 +13,22 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.LegendItemCollection;
+import org.jfree.chart.block.ColumnArrangement;
+import org.jfree.chart.block.LineBorder;
 import org.jfree.chart.fx.ChartViewer;
+import org.jfree.chart.title.LegendTitle;
+import org.jfree.chart.ui.HorizontalAlignment;
+import org.jfree.chart.ui.RectangleEdge;
+import org.jfree.chart.ui.VerticalAlignment;
 
+import java.awt.*;
 import java.util.ArrayList;
 
 public class MainController {
@@ -67,6 +78,7 @@ public class MainController {
         dataSourceList.add("PolygonAPI");
         dataSourceList.add("Buffer");
         dataSourceOList = FXCollections.observableList(dataSourceList);
+        Platform.setImplicitExit(false);
     }
 
     public void Test() {
@@ -100,6 +112,7 @@ public class MainController {
         progressIndicator.setProgress(0.25);
         Runnable run = () -> {
             try {
+                long start = System.nanoTime();
                 double readyPercent = 0.3;
                 data.connect();
                 progressIndicator.setProgress(readyPercent);
@@ -124,21 +137,24 @@ public class MainController {
                 readyPercent += 0.1;
                 intervalOList = FXCollections.observableList(intervalList);//ParseUtils.Split(intervalList, ">"); // need to cover it in getter
                 progressIndicator.setProgress(readyPercent);
+                long elapsedTime = System.nanoTime() - start;
+                System.out.println(elapsedTime);
             } catch (Exception e) {
-                infoLabel.setText("INFO:" + "Can't connect. Problem:" + e.getMessage());
-                //connectionLabel.setText("Not connected");
-                progressIndicator.setProgress(0.0);
-                setElementDisable(false);
+                Platform.runLater(() -> {
+                    infoLabel.setText("INFO:" + "Can't connect. Problem:" + e.getMessage());
+                    connectionLabel.setText("Not connected");
+                    progressIndicator.setProgress(0.0);
+                    setElementDisable(false);
+                });
                 return;
             }
-            //connectionLabel.setText("Connected");
             marketCB.setItems(marketOList);
             intervalCB.setItems(intervalOList);
             quoteCB.setItems(quoteOList);
-            setElementDisable(false);
-            //JfreeCandlestickChart obj = new JfreeCandlestickChart("title");
-            //JFreeChart chart = obj.createChart("dataset");
-            //mainChartRegion = new ChartViewer(chart);
+            Platform.runLater(() -> {
+                connectionLabel.setText("Connected");
+                setElementDisable(false);
+            });
         };
         Thread myThread = new Thread(run, "DataThread");
         myThread.start();
@@ -311,10 +327,21 @@ public class MainController {
             for (int i = 0; i < data.data.size(); ++i) {
                 temp.onTrade(data.data.get(i));
             }
+            temp.fillEMAIndicator(data.data, 6, 0.5, 12, 26, 9);
             JFreeChart chart = temp.createChart((String) marketCB.getValue() + " " +
                     (String) quoteCB.getValue() + " " +
                     beginDateTF.getText() + "-" +
                     endDateTF.getText());
+            LegendTitle legend = new LegendTitle(chart.getPlot(), new ColumnArrangement(HorizontalAlignment.CENTER, VerticalAlignment.CENTER,0, 0),
+                    new ColumnArrangement(HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 0, 0));
+
+            legend.setPosition(RectangleEdge.BOTTOM);
+            legend.setHorizontalAlignment(HorizontalAlignment.CENTER);
+            legend.setBackgroundPaint(Color.WHITE);
+            legend.setFrame(new LineBorder());
+            legend.setMargin(0, 4, 5, 6);
+
+            chart.addLegend(legend);
             ChartViewer viewer = new ChartViewer(chart);
             Stage stage = new Stage();
             stage.setScene(new Scene(viewer));

@@ -17,6 +17,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
 
@@ -39,11 +40,12 @@ public class FinamSelenium extends DataSourceBase {
     private WebElement buttonToOpenIntervalCB;
 
     private ArrayList<String> intervalList = new ArrayList<>();
-
+private int numberOfThreads;
     // driver init
     public FinamSelenium(ChromeOptions options) {
         data = new ArrayList<>();
         driver = new ChromeDriver(options);
+        numberOfThreads = java.lang.Thread.activeCount();
     }
 
     // if someone need it to change
@@ -74,6 +76,7 @@ public class FinamSelenium extends DataSourceBase {
         initQuote = "ГАЗПРОМ ао";
         initContract = "GAZP";
         initInterval = "1 час";
+        numberOfThreads = java.lang.Thread.activeCount();
     }
 
     @Override
@@ -133,9 +136,46 @@ public class FinamSelenium extends DataSourceBase {
     private ArrayList<String> getList(List<WebElement> comboBoxList) throws Exception {
         checkFlags();
         var resultList = new ArrayList<String>();
-        for (int i = 0; i < comboBoxList.size(); ++i) { // we need multithreading
+        for (int i = 0; i < comboBoxList.size(); ++i) { // we need multithreading but it is not work correctly
             resultList.add(comboBoxList.get(i).getAttribute("innerHTML"));
         }
+        /*ArrayList<Thread> threadList = new ArrayList<>();
+        ArrayList<ArrayList<String>> dataList = new ArrayList<>();
+        for (int i = 0; i < numberOfThreads-1; ++i) {
+            var tempArray = new ArrayList<String>();
+            dataList.add(tempArray);
+            int finalI = i;
+            Runnable run = () -> {
+                System.out.println("Thread +"+finalI + "begin");
+                for (int j = finalI *(comboBoxList.size()/numberOfThreads); j < (finalI+1) *(comboBoxList.size()/numberOfThreads); ++j) { // we need multithreading
+                    tempArray.add(comboBoxList.get(j).getAttribute("innerHTML"));
+                }
+                System.out.println("Thread +"+finalI + "end");
+            };
+            var tempThread = new Thread(run, "DataThread"+i);
+            threadList.add(tempThread);
+        }
+        var tempArray = new ArrayList<String>();
+        dataList.add(tempArray);
+        int finalI = numberOfThreads;
+        Runnable run = () -> {
+            System.out.println("Thread +"+finalI + "begin");
+            for (int j = (finalI-1) *(comboBoxList.size()/numberOfThreads); j < comboBoxList.size(); ++j) { // we need multithreading
+                tempArray.add(comboBoxList.get(j).getAttribute("innerHTML"));
+            }
+            System.out.println("Thread +"+finalI + "end");
+        };
+        var tempThread = new Thread(run, "DataThread"+numberOfThreads);
+        threadList.add(tempThread);
+        for(int i=0;i<threadList.size();++i){
+            threadList.get(i).start();
+        }
+        for(int i=0;i<threadList.size();++i){
+            threadList.get(i).join();
+        }
+        for(int i=0;i<threadList.size();++i){
+            resultList = new ArrayList<String>(Stream.concat(resultList.stream(), dataList.get(i).stream()).toList());
+        }*/
         return resultList;
     }
 
