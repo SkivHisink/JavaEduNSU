@@ -83,12 +83,12 @@ public class ApiExecutor extends DataSourceBase{
     }
 
     @Override
-    public void setMarket(String marketName, int marketNumber) throws Exception {
+    public void setMarket(String marketName, int marketNumber, int marketPos) throws Exception {
 
     }
 
     @Override
-    public void setQuote(String quoteName, int quoteNumber) throws Exception {
+    public void setQuote(String quoteName, int quoteNumber, int quotePos) throws Exception {
 
     }
 
@@ -105,6 +105,11 @@ public class ApiExecutor extends DataSourceBase{
     @Override
     public void setEndDate() {
 
+    }
+
+    @Override
+    public String getMinDate() {
+        return null;
     }
 
     @Override

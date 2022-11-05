@@ -6,10 +6,9 @@
 <?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.Region?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="582.0" prefWidth="777.0" xmlns="http://javafx.com/javafx/15" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.labwork2.MainController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="383.0" prefWidth="626.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.labwork2.MainController">
    <children>
       <Label layoutX="12.0" layoutY="15.0" text="Data source">
          <font>
@@ -43,38 +42,112 @@
          </font>
       </Label>
       <ComboBox id="IntervalComboBox" fx:id="intervalCB" disable="true" layoutX="87.0" layoutY="115.0" onAction="#setIntervalValue" prefWidth="150.0" promptText="None" />
-      <Region id="MainChartRegion" fx:id="mainChartRegion" layoutX="14.0" layoutY="153.0" prefHeight="400.0" prefWidth="750.0" />
-      <ProgressIndicator id="ConnectionStatusBar" fx:id="progressIndicator" layoutX="638.0" layoutY="16.0" progress="0.0" />
-      <Label id="ConnectionStatusLabel" fx:id="connectionLabel" layoutX="670.0" layoutY="20.0" text="Not Connected">
+      <ProgressIndicator id="ConnectionStatusBar" fx:id="progressIndicator" layoutX="490.0" layoutY="4.0" prefHeight="33.0" prefWidth="24.0" progress="0.0" />
+      <Label id="ConnectionStatusLabel" fx:id="connectionLabel" layoutX="522.0" layoutY="13.0" text="Not Connected">
          <font>
             <Font name="Times New Roman" size="14.0" />
          </font>
       </Label>
       <Button id="ConnectButton" fx:id="connectButton" layoutX="244.0" layoutY="11.0" mnemonicParsing="false" onAction="#onConnectButtonClick" text="Connect" />
-      <Label id="InfoLabel" fx:id="infoLabel" layoutX="19.0" layoutY="560.0" prefHeight="16.0" prefWidth="743.0" text="INFO:">
+      <Label id="InfoLabel" fx:id="infoLabel" layoutX="8.0" layoutY="361.0" prefHeight="16.0" prefWidth="611.0" text="INFO:">
          <font>
             <Font name="Times New Roman" size="14.0" />
          </font>
       </Label>
-      <Button id="GetDataButton" fx:id="getDataButton" disable="true" layoutX="693.0" layoutY="115.0" mnemonicParsing="false" onAction="#onGetDataButton" text="Get data" />
+      <Button id="GetDataButton" fx:id="getDataButton" disable="true" layoutX="545.0" layoutY="228.0" mnemonicParsing="false" onAction="#onGetDataButton" text="Get data" />
       <Label layoutX="32.0" layoutY="49.0" text="Market">
          <font>
             <Font name="Times New Roman" size="14.0" />
          </font>
       </Label>
       <ComboBox id="MarketComboBox" fx:id="marketCB" disable="true" layoutX="88.0" layoutY="44.0" onAction="#setMarketValue" prefWidth="150.0" promptText="None" />
-      <Label layoutX="287.0" layoutY="49.0" text="Quote">
+      <Label layoutX="259.0" layoutY="49.0" text="Quote">
          <font>
             <Font name="Times New Roman" size="14.0" />
          </font>
       </Label>
-      <ComboBox id="QuoteComboBox" fx:id="quoteCB" disable="true" layoutX="333.0" layoutY="44.0" onAction="#setQuoteValue" prefWidth="150.0" promptText="None" />
-      <Label layoutX="492.0" layoutY="49.0" text="Contract">
+      <ComboBox id="QuoteComboBox" fx:id="quoteCB" disable="true" layoutX="305.0" layoutY="44.0" onAction="#setQuoteValue" prefWidth="150.0" promptText="None" />
+      <Label layoutX="466.0" layoutY="49.0" text="Contract">
          <font>
             <Font name="Times New Roman" size="14.0" />
          </font>
       </Label>
-      <Label fx:id="contractLabel" disable="true" layoutX="548.0" layoutY="49.0" text="None" underline="true">
+      <Label fx:id="contractLabel" disable="true" layoutX="522.0" layoutY="49.0" text="None" underline="true">
+         <font>
+            <Font name="Times New Roman" size="14.0" />
+         </font>
+      </Label>
+      <Label layoutX="65.0" layoutY="173.0" text="TS">
+         <font>
+            <Font name="Times New Roman" size="14.0" />
+         </font>
+      </Label>
+      <TextField fx:id="emaTSTF" disable="true" layoutX="91.0" layoutY="168.0" promptText="6" text="6">
+         <font>
+            <Font name="Times New Roman" size="14.0" />
+         </font>
+      </TextField>
+      <Label layoutX="283.0" layoutY="172.0" text="SF">
+         <font>
+            <Font name="Times New Roman" size="14.0" />
+         </font>
+      </Label>
+      <TextField fx:id="emaSFTF" disable="true" layoutX="307.0" layoutY="167.0" promptText="0.5" text="0.5">
+         <font>
+            <Font name="Times New Roman" size="14.0" />
+         </font>
+      </TextField>
+      <Label layoutX="18.0" layoutY="233.0" text="Fast TS">
+         <font>
+            <Font name="Times New Roman" size="14.0" />
+         </font>
+      </Label>
+      <TextField fx:id="macdfTSTF" disable="true" layoutX="91.0" layoutY="229.0" promptText="12" text="12">
+         <font>
+            <Font name="Times New Roman" size="14.0" />
+         </font>
+      </TextField>
+      <Label layoutX="283.0" layoutY="232.0" text="Slow TS">
+         <font>
+            <Font name="Times New Roman" size="14.0" />
+         </font>
+      </Label>
+      <TextField fx:id="macdsTSTF" disable="true" layoutX="349.0" layoutY="229.0" promptText="26" text="26">
+         <font>
+            <Font name="Times New Roman" size="14.0" />
+         </font>
+      </TextField>
+      <Label layoutX="18.0" layoutY="146.0" text="EMA">
+         <font>
+            <Font name="Times New Roman" size="14.0" />
+         </font>
+      </Label>
+      <Label layoutX="18.0" layoutY="206.0" text="MACD">
+         <font>
+            <Font name="Times New Roman" size="14.0" />
+         </font>
+      </Label>
+      <Label layoutX="307.0" layoutY="132.0" text="SF = Smoothing factor">
+         <font>
+            <Font name="Times New Roman" size="14.0" />
+         </font>
+      </Label>
+      <Label layoutX="63.0" layoutY="295.0" text="TS">
+         <font>
+            <Font name="Times New Roman" size="14.0" />
+         </font>
+      </Label>
+      <TextField fx:id="smaTSTF" disable="true" layoutX="91.0" layoutY="290.0" promptText="9" text="9">
+         <font>
+            <Font name="Times New Roman" size="14.0" />
+         </font>
+      </TextField>
+      <Label layoutX="13.0" layoutY="263.0" text="SMA">
+         <font>
+            <Font name="Times New Roman" size="14.0" />
+         </font>
+      </Label>
+      <Label layoutX="445.0" layoutY="132.0" text="TS = Time step">
          <font>
             <Font name="Times New Roman" size="14.0" />
          </font>

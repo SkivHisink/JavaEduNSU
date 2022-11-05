@@ -5,7 +5,7 @@ import com.labwork2.datasource.ApiExecutor;
 import com.labwork2.datasource.DataSourceBase;
 import com.labwork2.datasource.DownloadedDataBuffef;
 import com.labwork2.datasource.FinamSelenium;
-import com.labwork2.utils.ParseUtils;
+import com.labwork2.utils.TimeUtils;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -19,7 +19,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.LegendItemCollection;
 import org.jfree.chart.block.ColumnArrangement;
 import org.jfree.chart.block.LineBorder;
 import org.jfree.chart.fx.ChartViewer;
@@ -58,6 +57,16 @@ public class MainController {
     @FXML
     TextField endDateTF;
     @FXML
+    TextField emaTSTF;
+    @FXML
+    TextField emaSFTF;
+    @FXML
+    TextField macdfTSTF;
+    @FXML
+    TextField macdsTSTF;
+    @FXML
+    TextField smaTSTF;
+    @FXML
     Label contractLabel;
     // support GUI objects
     private ArrayList<String> dataSourceList;
@@ -71,18 +80,17 @@ public class MainController {
     private ObservableList<String> intervalOList;
     //Flags
     boolean isDSCBinit = false;
+    //Stage container
+    static private ArrayList<Stage> stageList;
 
     public MainController() {
+        stageList = new ArrayList<>();
         dataSourceList = new ArrayList<>();
         dataSourceList.add("Finam");
         dataSourceList.add("PolygonAPI");
         dataSourceList.add("Buffer");
         dataSourceOList = FXCollections.observableList(dataSourceList);
-        Platform.setImplicitExit(false);
-    }
-
-    public void Test() {
-        infoLabel.setText("!HELLO TEST!");
+        //Platform.setImplicitExit(false); // Зачем я вообще это использовал? Good question
     }
 
     public void InitDataSourceCB() {
@@ -92,21 +100,47 @@ public class MainController {
         }
     }
 
+    private void postBreakConnectingActions(String info) {
+        data = null;
+        infoLabel.setText("INFO:" + info);
+        setElementDisable(false);
+        setElementNotMainDisable(true);
+        progressIndicator.setProgress(0.0);
+        connectionLabel.setText("Not connected");
+    }
+
+    private void postBreakConnectingActions() {
+        postBreakConnectingActions("Data source not selected");
+    }
+
     public void onConnectButtonClick() {
         progressIndicator.setProgress(0.1);
         setElementDisable(true);
         connectionLabel.setText("Connecting...");
+        if (FinamSelenium.driver != null) {
+            FinamSelenium.driver.quit();
+        }
         if (dataSourceCB.getValue() == null) {
-            infoLabel.setText("INFO:" + "Data source not selected");
+            postBreakConnectingActions();
             return;
-        } else if (dataSourceCB.getValue().equals(dataSourceList.get(0))) {
+        }
+        else if (dataSourceCB.getValue().equals(dataSourceList.get(0))) {
             data = new FinamSelenium();
-        } else if (dataSourceCB.getValue().equals(dataSourceList.get(1))) {
+        }
+        else if (dataSourceCB.getValue().equals(dataSourceList.get(1))) {
             data = new ApiExecutor();
-        } else if (dataSourceCB.getValue().equals(dataSourceList.get(2))) {
+            // Nowadays, we don't have this type of dataSource
+            postBreakConnectingActions("This method is not realized");
+            return;
+        }
+        else if (dataSourceCB.getValue().equals(dataSourceList.get(2))) {
             data = new DownloadedDataBuffef();
-        } else {
-            infoLabel.setText("INFO:" + "Data source not selected");
+            // Nowadays, we don't have this type of dataSource
+            postBreakConnectingActions("This method is not realized");
+            return;
+        }
+        else {
+            postBreakConnectingActions();
             return;
         }
         progressIndicator.setProgress(0.25);
@@ -148,10 +182,10 @@ public class MainController {
                 });
                 return;
             }
-            marketCB.setItems(marketOList);
-            intervalCB.setItems(intervalOList);
-            quoteCB.setItems(quoteOList);
             Platform.runLater(() -> {
+                marketCB.setItems(marketOList);
+                intervalCB.setItems(intervalOList);
+                quoteCB.setItems(quoteOList);
                 connectionLabel.setText("Connected");
                 setElementDisable(false);
             });
@@ -161,20 +195,27 @@ public class MainController {
         quoteCB.setValue(data.initQuote);
         marketCB.setValue(data.initMarket);
         intervalCB.setValue(data.initInterval);
-        JfreeCandlestickChart chart = new JfreeCandlestickChart("hello");
-        //mainChartRegion.setChart(chart.createChart("heh"));
     }
 
     private void setElementDisable(boolean isDisable) {
         dataSourceCB.setDisable(isDisable);
+        connectButton.setDisable(isDisable);
+        setElementNotMainDisable(isDisable);
+    }
+
+    private void setElementNotMainDisable(boolean isDisable) {
         marketCB.setDisable(isDisable);
         quoteCB.setDisable(isDisable);
-        connectButton.setDisable(isDisable);
         beginDateTF.setDisable(isDisable);
         endDateTF.setDisable(isDisable);
         getDataButton.setDisable(isDisable);
         intervalCB.setDisable(isDisable);
         contractLabel.setDisable(isDisable);
+        emaSFTF.setDisable(isDisable);
+        emaSFTF.setDisable(isDisable);
+        macdsTSTF.setDisable(isDisable);
+        macdsTSTF.setDisable(isDisable);
+        smaTSTF.setDisable(isDisable);
     }
 
     @FXML
@@ -187,29 +228,35 @@ public class MainController {
             return;
         }
         Runnable run = () -> {
-            setElementDisable(true);
             var marketCBValue = (String) marketCB.getValue();
             boolean isFound = false;
+            int j = 0;
             for (int i = 0; i < marketList.size(); ++i) {
                 if (marketList.get(i).contains(marketCBValue)) {
                     marketCBValue = marketList.get(i);
+                    j = i;
                     isFound = true;
                     break;
                 }
             }
             if (isFound) {
                 try {
-                    data.setMarket(marketCBValue, marketList.size());
+                    data.setMarket(marketCBValue, marketList.size(), j);
                     quoteList = data.getQuotesList();
                     quoteOList = FXCollections.observableList(quoteList);//ParseUtils.Split(quoteList, ">");
                     quoteCB.setItems(quoteOList);
                 } catch (Exception e) {
-                    infoLabel.setText("INFO:" + "Can't connect. Problem:" + e.getMessage());
+                    Platform.runLater(() -> {
+                        infoLabel.setText("INFO:" + "Can't connect. Problem:" + e.getMessage());
+                    });
                 }
             }
-            setElementDisable(false);
+            Platform.runLater(() -> {
+                setElementDisable(false);
+            });
         };
         Thread myThread = new Thread(run, "MarketThread");
+        setElementDisable(true);
         myThread.start();
     }
 
@@ -222,10 +269,9 @@ public class MainController {
             return;
         }
         Runnable run = () -> {
-            setElementDisable(true);
             var quoteCBValue = (String) quoteCB.getValue();
             boolean isFound = false;
-
+            int j = 0 ;
             for (int i = 0; i < quoteList.size(); ++i) {
                 if (quoteList.get(i).contains(quoteCBValue)) {
                     quoteCBValue = quoteList.get(i);
@@ -235,14 +281,19 @@ public class MainController {
             }
             if (isFound) {
                 try {
-                    data.setQuote(quoteCBValue, quoteList.size());
+                    data.setQuote(quoteCBValue, quoteList.size(), j);
                 } catch (Exception e) {
-                    infoLabel.setText("INFO:" + "Can't connect. Problem:" + e.getMessage());
+                    Platform.runLater(() -> {
+                        infoLabel.setText("INFO:" + "Can't connect. Problem:" + e.getMessage());
+                    });
                 }
             }
-            setElementDisable(false);
+            Platform.runLater(() -> {
+                setElementDisable(false);
+            });
         };
         Thread myThread = new Thread(run, "QuoteThread");
+        setElementDisable(true);
         myThread.start();
     }
 
@@ -256,99 +307,89 @@ public class MainController {
             return;
         }
         Runnable run = () -> {
-            setElementDisable(true);
             try {
                 data.setInterval((String) intervalCB.getValue(), intervalList.size());
             } catch (Exception e) {
-                //ehhh
+                Platform.runLater(() -> {
+                    infoLabel.setText("INFO:" + "Interval problem. Problem:" + e.getMessage());
+                });
             }
-            setElementDisable(false);
+            Platform.runLater(() -> {
+                setElementDisable(false);
+            });
         };
         Thread myThread = new Thread(run, "IntervalThread");
+        setElementDisable(true);
         myThread.start();
+    }
+
+    static public void deleteAllStages() {
+        for (int i = 0; i < stageList.size(); ++i) {
+            stageList.get(i).close();
+        }
     }
 
     @FXML
     public void onGetDataButton() {
         try {
-            var beginDate = ((String) beginDateTF.getText()).split("\\.");
+            JfreeCandlestickChart temp = new JfreeCandlestickChart("heh");
+            String interval = (String) intervalCB.getValue();
+            if(!temp.setInterval(interval, intervalList, infoLabel){
+                return;
+            }
+            //get date
+            var beginDateStr = ((String) beginDateTF.getText());
+            var endDateStr = ((String) endDateTF.getText());
+            //analyze date
+            if (!TimeUtils.isValidDate(beginDateStr)) {
+                infoLabel.setText("INFO:" + "Begin date is wrong.");
+                return;
+            }
+            if (!TimeUtils.isValidDate(endDateStr)) {
+                infoLabel.setText("INFO:" + "End date is wrong.");
+                return;
+            }
+            var beginDate = beginDateStr.split("\\.");
+            var endDate = endDateStr.split("\\.");
+            var beginDateDay = Integer.parseInt(beginDate[0]);
+            var beginDateMonth = Integer.parseInt(beginDate[1]) - 1;
+            var beginDateYear = Integer.parseInt(beginDate[2]);
+            var beginMinDate = data.getMinDate().split("\\.");
+            //if(beginDateDay>) TODO: Add checking of begin date and final date
+            //set date
             data.setBeginData(Integer.parseInt(beginDate[0]),
                     Integer.parseInt(beginDate[1]) - 1,
                     Integer.parseInt(beginDate[2]));
-            var endDate = ((String) endDateTF.getText()).split("\\.");
             data.setEndData(Integer.parseInt(endDate[0]),
                     Integer.parseInt(endDate[1]) - 1,
                     Integer.parseInt(endDate[2]));
             data.getData();
-            JfreeCandlestickChart temp = new JfreeCandlestickChart("heh");
-            String interval = (String) intervalCB.getValue();
-            // ticks
-            if (interval.equals(intervalList.get(0))) {
-                temp.setTimeInterval(1);
-            }
-            // mins
-            else if (interval.equals(intervalList.get(1))) {
-                temp.setTimeInterval(1);
-            }
-            // 5 mins
-            else if (interval.equals(intervalList.get(2))) {
-                temp.setTimeInterval(5);
-            }
-            // 10 mins
-            else if (interval.equals(intervalList.get(3))) {
-                temp.setTimeInterval(10);
-            }
-            // 15 mins
-            else if (interval.equals(intervalList.get(4))) {
-                temp.setTimeInterval(15);
-            }
-            // 30 min
-            else if (interval.equals(intervalList.get(5))) {
-                temp.setTimeInterval(30);
-            }
-            // 1 hour
-            else if (interval.equals(intervalList.get(6))) {
-                temp.setTimeInterval(60);
-            }
-            // 1 day
-            else if (interval.equals(intervalList.get(7))) {
-                temp.setTimeInterval(60 * 24);
-            }
-            // 1 week
-            else if (interval.equals(intervalList.get(8))) {
-                temp.setTimeInterval(60 * 24 * 7);
-            }
-            // 1 month
-            else if (interval.equals(intervalList.get(9))) {
-                temp.setTimeInterval(60 * 24 * 7 * 4); // problemss
-            } else {
-                // something impossible happend
-            }
+
             for (int i = 0; i < data.data.size(); ++i) {
                 temp.onTrade(data.data.get(i));
             }
-            temp.fillEMAIndicator(data.data, 6, 0.5, 12, 26, 9);
-            JFreeChart chart = temp.createChart((String) marketCB.getValue() + " " +
+            temp.fillIndicators(data.data, 6, 0.5, 12, 26, 9); // TODO: take numbers from text fields and check it before
+            var chartAndWindowName = (String) marketCB.getValue() + " " +
                     (String) quoteCB.getValue() + " " +
                     beginDateTF.getText() + "-" +
-                    endDateTF.getText());
-            LegendTitle legend = new LegendTitle(chart.getPlot(), new ColumnArrangement(HorizontalAlignment.CENTER, VerticalAlignment.CENTER,0, 0),
+                    endDateTF.getText();
+            JFreeChart chart = temp.createChart(chartAndWindowName);
+            LegendTitle legend = new LegendTitle(chart.getPlot(), new ColumnArrangement(HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 0, 0),
                     new ColumnArrangement(HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 0, 0));
-
             legend.setPosition(RectangleEdge.BOTTOM);
             legend.setHorizontalAlignment(HorizontalAlignment.CENTER);
             legend.setBackgroundPaint(Color.WHITE);
             legend.setFrame(new LineBorder());
             legend.setMargin(0, 4, 5, 6);
-
             chart.addLegend(legend);
             ChartViewer viewer = new ChartViewer(chart);
             Stage stage = new Stage();
             stage.setScene(new Scene(viewer));
-            stage.setTitle("JFreeChart: TimeSeriesFXDemo1.java");
+            stage.setTitle(chartAndWindowName);
             stage.show();
+            stageList.add(stage);
         } catch (Exception e) {
-            infoLabel.setText("INFO:" + "Wrong date. Please check date.");
+            infoLabel.setText("INFO:" + "Something wrong.Problem:"+e.getMessage());
         }
     }
 }

@@ -40,7 +40,8 @@ public class FinamSelenium extends DataSourceBase {
     private WebElement buttonToOpenIntervalCB;
 
     private ArrayList<String> intervalList = new ArrayList<>();
-private int numberOfThreads;
+    private int numberOfThreads;
+
     // driver init
     public FinamSelenium(ChromeOptions options) {
         data = new ArrayList<>();
@@ -204,9 +205,25 @@ private int numberOfThreads;
         }
     }
 
+    private void setComboBoxValueByIndex(String varName, int comboboxSize, List<WebElement> comboBoxList, WebElement button, int index) throws Exception {
+        checkFlags();
+        button.click();
+        Thread.sleep(1000);
+        if (comboBoxList.get(index).getAttribute("innerHTML").contains(varName)) {
+            //comboBoxList.get(index).click();
+            var temp = comboBoxList.get(index);
+            if (driver instanceof JavascriptExecutor) {
+                ((JavascriptExecutor) driver).executeScript("arguments[0].click();",  temp);
+            }
+        }
+        else{
+            setComboBoxValue(varName, comboboxSize, comboBoxList, button);
+        }
+    }
+
     @Override
-    public void setMarket(String marketName, int marketNumber) throws Exception {
-        setComboBoxValue(marketName, marketNumber, marketComboBoxList, buttonToOpenMarketCB);
+    public void setMarket(String marketName, int marketNumber, int marketPos) throws Exception {
+        setComboBoxValueByIndex(marketName, marketNumber, marketComboBoxList, buttonToOpenMarketCB, marketPos);
         buttonToOpenMarketCB = driver.findElement(By.className("finam-ui-quote-selector-market")).
                 findElement(By.className("finam-ui-quote-selector-arrow"));
         quotesComboBoxList = marketDropDownList.get(1).findElement(By.xpath("./div")).
@@ -217,8 +234,8 @@ private int numberOfThreads;
     }
 
     @Override
-    public void setQuote(String quoteName, int quoteNumber) throws Exception {
-        setComboBoxValue(quoteName, quoteNumber, quotesComboBoxList, buttonToOpenQuoteCB);
+    public void setQuote(String quoteName, int quoteNumber, int quotePos) throws Exception {
+        setComboBoxValueByIndex(quoteName, quoteNumber, quotesComboBoxList, buttonToOpenQuoteCB, quotePos);
         Thread.sleep(500);
         updateAllVariables();
     }
@@ -235,6 +252,11 @@ private int numberOfThreads;
     @Override
     public void setEndDate() {
 
+    }
+
+    @Override
+    public String getMinDate() {
+        return "01.01.1976";
     }
 
     public void setDataStep() {

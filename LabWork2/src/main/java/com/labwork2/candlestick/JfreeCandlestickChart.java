@@ -1,6 +1,5 @@
 package com.labwork2.candlestick;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -17,8 +16,8 @@ import com.labwork2.indicators.SMAIndicator;
 import com.labwork2.model.TradeData;
 import com.labwork2.utils.MathUtils;
 import com.labwork2.utils.TimeUtils;
+import javafx.scene.control.Label;
 import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.NumberAxis;
@@ -32,7 +31,6 @@ import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.time.FixedMillisecond;
-import org.jfree.data.time.Millisecond;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.time.ohlc.OHLCSeries;
@@ -187,7 +185,7 @@ public class JfreeCandlestickChart extends JPanel {
     private double MACDmaxVal = -9999999; // fix to double min and max
     private double MACDminVal = 9999999; // fix to double min and max
 
-    public void fillEMAIndicator(ArrayList<TradeData> data, int Time, double Price, int femaw, int semaw, int smaw) {
+    public void fillIndicators(ArrayList<TradeData> data, int Time, double Price, int femaw, int semaw, int smaw) {
         int i = 0;
         try {
             var tempList = new ArrayList<Double>();
@@ -235,7 +233,55 @@ public class JfreeCandlestickChart extends JPanel {
             e.printStackTrace();
         }
     }
-
+    public boolean setInterval(String interval, ArrayList<String> intervalList, Label infoLabel)
+    {
+// ticks
+        if (interval.equals(intervalList.get(0))) {
+            this.setTimeInterval(1);
+            infoLabel.setText("INFO:" + "We don't work with ticks nowadays.");
+            return false;
+        }
+        // mins
+        else if (interval.equals(intervalList.get(1))) {
+            this.setTimeInterval(1);
+        }
+        // 5 mins
+        else if (interval.equals(intervalList.get(2))) {
+            this.setTimeInterval(5);
+        }
+        // 10 mins
+        else if (interval.equals(intervalList.get(3))) {
+            this.setTimeInterval(10);
+        }
+        // 15 mins
+        else if (interval.equals(intervalList.get(4))) {
+            this.setTimeInterval(15);
+        }
+        // 30 min
+        else if (interval.equals(intervalList.get(5))) {
+            this.setTimeInterval(30);
+        }
+        // 1 hour
+        else if (interval.equals(intervalList.get(6))) {
+            this.setTimeInterval(60);
+        }
+        // 1 day
+        else if (interval.equals(intervalList.get(7))) {
+            this.setTimeInterval(60 * 24);
+        }
+        // 1 week
+        else if (interval.equals(intervalList.get(8))) {
+            this.setTimeInterval(60 * 24 * 7);
+        }
+        // 1 month
+        else if (interval.equals(intervalList.get(9))) {
+            this.setTimeInterval(60 * 24 * 7 * 4); // problemss
+        } else {
+            // something impossible happend
+            return false;
+        }
+        return true;
+    }
     String date = null;
 
     /**

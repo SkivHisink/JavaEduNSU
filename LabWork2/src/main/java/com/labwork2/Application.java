@@ -27,7 +27,7 @@ public class Application extends javafx.application.Application {
             FinamSelenium.driver.quit();
         }
         System.out.println("Stage is closing");
-        // Save file
+        MainController.deleteAllStages();
     }
     public static void main(String[] args) {
         launch();

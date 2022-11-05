@@ -1,5 +1,8 @@
 package com.labwork2.utils;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+
 /**
  * The Class TimeUtils.
  *
@@ -41,5 +44,18 @@ public class TimeUtils {
         return time;
     }
 
+    public static boolean isValidDate(String input) {
+        String formatString = "dd.MM.yyyy";
+
+        try {
+            SimpleDateFormat format = new SimpleDateFormat(formatString);
+            format.setLenient(false);
+            format.parse(input);
+        } catch (ParseException | IllegalArgumentException e) {
+            return false;
+        }
+
+        return true;
+    }
 }
 
