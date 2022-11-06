@@ -206,17 +206,17 @@ public class FinamSelenium extends DataSourceBase {
     }
 
     private void setComboBoxValueByIndex(String varName, int comboboxSize, List<WebElement> comboBoxList, WebElement button, int index) throws Exception {
-        checkFlags();
-        button.click();
-        Thread.sleep(1000);
         if (comboBoxList.get(index).getAttribute("innerHTML").contains(varName)) {
-            //comboBoxList.get(index).click();
-            var temp = comboBoxList.get(index);
-            if (driver instanceof JavascriptExecutor) {
-                ((JavascriptExecutor) driver).executeScript("arguments[0].click();",  temp);
-            }
+            checkFlags();
+            button.click();
+            Thread.sleep(100);
+            comboBoxList.get(index).click();
+            //    var temp = comboBoxList.get(index);
+            //    if (driver instanceof JavascriptExecutor) {
+            //        ((JavascriptExecutor) driver).executeScript("arguments[0].click();",  temp);
+            //}
         }
-        else{
+        else {
             setComboBoxValue(varName, comboboxSize, comboBoxList, button);
         }
     }

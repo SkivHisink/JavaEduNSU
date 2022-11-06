@@ -45,6 +45,9 @@ public class JfreeCandlestickChart extends JPanel {
 
     private static final DateFormat READABLE_TIME_FORMAT = new SimpleDateFormat("yyyyMMdd kk:mm:ss");
 
+    public boolean IsEma = true;
+    public boolean IsMacd = true;
+    public boolean IsSma = true;
     private OHLCSeries ohlcSeries;
     private TimeSeries volumeSeries;
     private TimeSeries EMASeries;
@@ -118,9 +121,11 @@ public class JfreeCandlestickChart extends JPanel {
          */
         // creates TimeSeriesCollection as a volume dataset for volume chart
         TimeSeriesCollection EMADataset = new TimeSeriesCollection();
-        EMADataset.addSeries(EMASeries);
+        if (IsEma) {
+            EMADataset.addSeries(EMASeries);
+        }
         // Create volumeSubplot
-        JFreeChart EMAresult = ChartFactory.createTimeSeriesChart("EMA", "Time", "EMA", EMADataset);
+        JFreeChart EMAresult = ChartFactory.createTimeSeriesChart("EMA" + "TS = " + emaTS + " SF = " + emaSF, "Time", "EMA", EMADataset);
         XYPlot EMASubplot = EMAresult.getXYPlot();
         EMASubplot.setBackgroundPaint(Color.white);
         /**
@@ -128,14 +133,25 @@ public class JfreeCandlestickChart extends JPanel {
          */
         // creates TimeSeriesCollection as a volume dataset for volume chart
         TimeSeriesCollection MACDDataset = new TimeSeriesCollection();
-        MACDDataset.addSeries(MACDSeries);
+        if (IsMacd) {
+            MACDDataset.addSeries(MACDSeries);
+        }
         TimeSeriesCollection SMADataset = new TimeSeriesCollection();
-        SMADataset.addSeries(SMASeries);
+        if (IsSma) {
+            SMADataset.addSeries(SMASeries);
+        }
         // Create MACD and SMA Subplot
-        final JFreeChart result = ChartFactory.createTimeSeriesChart("Dynamic Line And TimeSeries Chart",
-                "Time", "MACD", MACDDataset, true, true, false);
+        final JFreeChart result;
+        String valueAxisName = "";
+        if (IsSma) {
+            valueAxisName = "SMA";
+        }
+        if (IsMacd) {
+            valueAxisName = "MACD";
+        }
+        result = ChartFactory.createTimeSeriesChart("Dynamic Line And TimeSeries Chart",
+                "Time", valueAxisName, MACDDataset, true, true, false);
         final XYPlot plot = result.getXYPlot();
-        EMASubplot.setBackgroundPaint(Color.white);
         plot.setDomainGridlinesVisible(true);
         plot.setDomainGridlinePaint(Color.LIGHT_GRAY);
         plot.setRangeGridlinesVisible(true);
@@ -146,7 +162,9 @@ public class JfreeCandlestickChart extends JPanel {
         // Domain axis would show data of 60 seconds for a time
         xaxis.setVerticalTickLabels(true);
         final ValueAxis yaxis = plot.getRangeAxis();
-        yaxis.setRange(MACDminVal, MACDmaxVal);
+        if (IsMacd && IsSma || MACDmaxVal > MACDminVal) {
+            yaxis.setRange(MACDminVal, MACDmaxVal);
+        }
         XYItemRenderer renderer = plot.getRenderer();
         renderer.setSeriesPaint(0, Color.RED);
         final NumberAxis yAxis1 = (NumberAxis) plot.getRangeAxis();
@@ -173,8 +191,12 @@ public class JfreeCandlestickChart extends JPanel {
         mainPlot.setGap(10.0);
         mainPlot.add(candlestickSubplot, 3);
         mainPlot.add(volumeSubplot, 1);
-        mainPlot.add(EMASubplot, 1);
-        mainPlot.add(plot, 1);
+        if (IsEma) {
+            mainPlot.add(EMASubplot, 1);
+        }
+        if (IsMacd || IsSma) {
+            mainPlot.add(plot, 1);
+        }
         mainPlot.setOrientation(PlotOrientation.VERTICAL);
 
         JFreeChart chart = new JFreeChart(chartTitle, JFreeChart.DEFAULT_TITLE_FONT, mainPlot, true);
@@ -184,29 +206,48 @@ public class JfreeCandlestickChart extends JPanel {
 
     private double MACDmaxVal = -9999999; // fix to double min and max
     private double MACDminVal = 9999999; // fix to double min and max
+    private int emaTS;
+    private double emaSF;
+    private int femaw;
+    private int semaw;
+    private int smaw;
 
     public void fillIndicators(ArrayList<TradeData> data, int Time, double Price, int femaw, int semaw, int smaw) {
         int i = 0;
+        emaTS = Time;
+        emaSF = Price;
+        this.femaw = femaw;
+        this.semaw = semaw;
+        this.smaw = smaw;
         try {
             var tempList = new ArrayList<Double>();
             var sizeTimeList = timeList.size();
-            for (i = 0; i < sizeTimeList; ++i) {
-                if(i + Time >= sizeTimeList)
-                    break;
-                EMASeries.add(timeList.get(i), EMAIndicator.EMAForexIndicator(closeList, Price, i, i + Time));
+            if (IsEma) {
+                EMASeries = new TimeSeries("EMA:" + "TS = " + emaTS + " SF = " + emaSF);
+                for (i = 0; i < sizeTimeList; ++i) {
+                    if (i + Time >= sizeTimeList)
+                        break;
+                    EMASeries.add(timeList.get(i), EMAIndicator.EMAForexIndicator(closeList, Price, i, i + Time));
+                }
             }
-            for (i = 0; i < sizeTimeList; ++i) {
-                if (i + femaw >= sizeTimeList || i + semaw >= sizeTimeList)
-                    break;
-                var a = MACDIndicator.MACDTradingViewIndicator(closeList, i, i + femaw, i + semaw);
-                MACDSeries.add(timeList.get(i), a);
-                tempList.add(a);
+            if (IsMacd) {
+                MACDSeries = new TimeSeries("MACD:" + "fastTS = " + femaw + " slowTS = " + semaw);
+                for (i = 0; i < sizeTimeList; ++i) {
+                    if (i + femaw >= sizeTimeList || i + semaw >= sizeTimeList)
+                        break;
+                    var a = MACDIndicator.MACDTradingViewIndicator(closeList, i, i + femaw, i + semaw);
+                    MACDSeries.add(timeList.get(i), a);
+                    tempList.add(a);
+                }
             }
-            for (i = 0; i < tempList.size(); ++i) {
-                var b = SMAIndicator.SMATradingViewIndicator(tempList, i, smaw);
-                SMASeries.add(timeList.get(i), b);
-                MACDmaxVal = Double.max(Double.max(tempList.get(i), b), MACDmaxVal);
-                MACDminVal = Double.min(Double.min(tempList.get(i), b), MACDminVal);
+            if (IsSma) {
+                SMASeries = new TimeSeries("SMA:" + "SMATS = " + smaw);
+                for (i = 0; i < tempList.size(); ++i) {
+                    var b = SMAIndicator.SMATradingViewIndicator(tempList, i, smaw);
+                    SMASeries.add(timeList.get(i), b);
+                    MACDmaxVal = Double.max(Double.max(tempList.get(i), b), MACDmaxVal);
+                    MACDminVal = Double.min(Double.min(tempList.get(i), b), MACDminVal);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -233,8 +274,8 @@ public class JfreeCandlestickChart extends JPanel {
             e.printStackTrace();
         }
     }
-    public boolean setInterval(String interval, ArrayList<String> intervalList, Label infoLabel)
-    {
+
+    public boolean setInterval(String interval, ArrayList<String> intervalList, Label infoLabel) {
 // ticks
         if (interval.equals(intervalList.get(0))) {
             this.setTimeInterval(1);
@@ -282,6 +323,7 @@ public class JfreeCandlestickChart extends JPanel {
         }
         return true;
     }
+
     String date = null;
 
     /**
@@ -316,11 +358,11 @@ public class JfreeCandlestickChart extends JPanel {
             // Set intervalFirstPrint
             candelChartIntervalFirstPrint = t;
             // the first trade price in the day (day open price)
-            open = MathUtils.roundDouble(price, MathUtils.FOUR_DEC_DOUBLE_FORMAT);
+            open = MathUtils.roundDouble(t.getOpen(), MathUtils.FOUR_DEC_DOUBLE_FORMAT);
             // the interval low
-            low = MathUtils.roundDouble(price, MathUtils.FOUR_DEC_DOUBLE_FORMAT);
+            low = MathUtils.roundDouble(t.getLow(), MathUtils.FOUR_DEC_DOUBLE_FORMAT);
             // the interval high
-            high = MathUtils.roundDouble(price, MathUtils.FOUR_DEC_DOUBLE_FORMAT);
+            high = MathUtils.roundDouble(t.getHigh(), MathUtils.FOUR_DEC_DOUBLE_FORMAT);
             // set the initial volume
             volume = t.getVolume();
             // date

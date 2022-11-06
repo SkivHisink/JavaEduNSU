@@ -9,16 +9,22 @@ public class TradeData {
     private String date;
     private double high;
     private double low;
+    private double open;
 
-    public TradeData(String stock, long time, double price, long volume, String date, double high, double low) {
+    public TradeData(String stock, long time, double open, double price, long volume, String date, double high, double low) {
         super();
         this.stock = stock;
         this.time = time;
+        this.open = open;
         this.price = price;
         this.volume = volume;
         this.date = date;
         this.high = high;
         this.low = low;
+    }
+
+    public double getOpen() {
+        return open;
     }
 
     public TradeData(String stock, long time, double price, long volume) {

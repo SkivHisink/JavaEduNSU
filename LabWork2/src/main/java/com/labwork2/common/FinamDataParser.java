@@ -24,6 +24,7 @@ public class FinamDataParser {
             var temp = splittedData[i].split(",");
             TradeData tempData = new TradeData(temp[FinamConstants.STOCK_IDX],
                     TimeUtils.convertToMillisTime(temp[FinamConstants.TIME_IDX]),
+                    Double.parseDouble(temp[FinamConstants.OPEN_IDX]),
                     Double.parseDouble(temp[FinamConstants.PRICE_IDX]),
                     Long.parseLong(temp[FinamConstants.VOLUME_IDX]),
                     temp[FinamConstants.DATE_IDX],

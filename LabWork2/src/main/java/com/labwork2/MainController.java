@@ -28,6 +28,8 @@ import org.jfree.chart.ui.RectangleEdge;
 import org.jfree.chart.ui.VerticalAlignment;
 
 import java.awt.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class MainController {
@@ -40,8 +42,6 @@ public class MainController {
     ComboBox marketCB;
     @FXML
     ComboBox quoteCB;
-    @FXML
-    Region mainChartRegion;
     @FXML
     Label infoLabel;
     @FXML
@@ -68,6 +68,12 @@ public class MainController {
     TextField smaTSTF;
     @FXML
     Label contractLabel;
+    @FXML
+    CheckBox emaCheckBox;
+    @FXML
+    CheckBox macdCheckBox;
+    @FXML
+    CheckBox smaCheckBox;
     // support GUI objects
     private ArrayList<String> dataSourceList;
     private ObservableList<String> dataSourceOList;
@@ -123,23 +129,19 @@ public class MainController {
         if (dataSourceCB.getValue() == null) {
             postBreakConnectingActions();
             return;
-        }
-        else if (dataSourceCB.getValue().equals(dataSourceList.get(0))) {
+        } else if (dataSourceCB.getValue().equals(dataSourceList.get(0))) {
             data = new FinamSelenium();
-        }
-        else if (dataSourceCB.getValue().equals(dataSourceList.get(1))) {
+        } else if (dataSourceCB.getValue().equals(dataSourceList.get(1))) {
             data = new ApiExecutor();
             // Nowadays, we don't have this type of dataSource
             postBreakConnectingActions("This method is not realized");
             return;
-        }
-        else if (dataSourceCB.getValue().equals(dataSourceList.get(2))) {
+        } else if (dataSourceCB.getValue().equals(dataSourceList.get(2))) {
             data = new DownloadedDataBuffef();
             // Nowadays, we don't have this type of dataSource
             postBreakConnectingActions("This method is not realized");
             return;
-        }
-        else {
+        } else {
             postBreakConnectingActions();
             return;
         }
@@ -211,11 +213,14 @@ public class MainController {
         getDataButton.setDisable(isDisable);
         intervalCB.setDisable(isDisable);
         contractLabel.setDisable(isDisable);
+        emaTSTF.setDisable(isDisable);
         emaSFTF.setDisable(isDisable);
-        emaSFTF.setDisable(isDisable);
-        macdsTSTF.setDisable(isDisable);
+        macdfTSTF.setDisable(isDisable);
         macdsTSTF.setDisable(isDisable);
         smaTSTF.setDisable(isDisable);
+        emaCheckBox.setDisable(isDisable);
+        macdCheckBox.setDisable(isDisable);
+        smaCheckBox.setDisable(isDisable);
     }
 
     @FXML
@@ -245,6 +250,7 @@ public class MainController {
                     quoteList = data.getQuotesList();
                     quoteOList = FXCollections.observableList(quoteList);//ParseUtils.Split(quoteList, ">");
                     quoteCB.setItems(quoteOList);
+                    isDataModified = true;
                 } catch (Exception e) {
                     Platform.runLater(() -> {
                         infoLabel.setText("INFO:" + "Can't connect. Problem:" + e.getMessage());
@@ -271,10 +277,11 @@ public class MainController {
         Runnable run = () -> {
             var quoteCBValue = (String) quoteCB.getValue();
             boolean isFound = false;
-            int j = 0 ;
+            int j = 0;
             for (int i = 0; i < quoteList.size(); ++i) {
                 if (quoteList.get(i).contains(quoteCBValue)) {
                     quoteCBValue = quoteList.get(i);
+                    j = i;
                     isFound = true;
                     break;
                 }
@@ -282,6 +289,7 @@ public class MainController {
             if (isFound) {
                 try {
                     data.setQuote(quoteCBValue, quoteList.size(), j);
+                    isDataModified = true;
                 } catch (Exception e) {
                     Platform.runLater(() -> {
                         infoLabel.setText("INFO:" + "Can't connect. Problem:" + e.getMessage());
@@ -329,46 +337,93 @@ public class MainController {
         }
     }
 
+    private void solveIndicatorsProblem(JfreeCandlestickChart temp) {
+        var isEma = emaCheckBox.isSelected();
+        var isMacd = macdCheckBox.isSelected();
+        var isSma = smaCheckBox.isSelected();
+        int emaTS = 0;
+        double emaSF = 0;
+        int macdFTS = 0;
+        int macdSTS = 0;
+        int smaTS = 0;
+        if (isEma) {
+            emaTS = Integer.parseInt(emaTSTF.getText());
+            emaSF = Double.parseDouble(emaSFTF.getText());
+        }
+        if (isMacd) {
+            macdFTS = Integer.parseInt(macdfTSTF.getText());
+            macdSTS = Integer.parseInt(macdsTSTF.getText());
+        }
+        if (isSma) {
+            smaTS = Integer.parseInt(smaTSTF.getText());
+        }
+        temp.IsEma = isEma;
+        temp.IsMacd = isMacd;
+        temp.IsSma = isSma;
+        temp.fillIndicators(data.data, emaTS, emaSF, macdFTS, macdSTS, smaTS);
+    }
+
+    private boolean solveDateProblem() {
+        //get date
+        var beginDateStr = ((String) beginDateTF.getText());
+        var endDateStr = ((String) endDateTF.getText());
+        //analyze date
+        if (!TimeUtils.isValidDate(beginDateStr)) {
+            infoLabel.setText("INFO:" + "Begin date is wrong.");
+            return false;
+        }
+        if (!TimeUtils.isValidDate(endDateStr)) {
+            infoLabel.setText("INFO:" + "End date is wrong.");
+            return false;
+        }
+        var beginDate = beginDateStr.split("\\.");
+        var endDate = endDateStr.split("\\.");
+        var beginDateDay = Integer.parseInt(beginDate[0]);
+        var beginDateMonth = Integer.parseInt(beginDate[1]) - 1;
+        var beginDateYear = Integer.parseInt(beginDate[2]);
+        var beginMinDate = data.getMinDate().split("\\.");
+        if (beginDateDay > 1 && beginDateMonth > 0 && beginDateYear < Integer.parseInt(beginMinDate[2])) {
+            infoLabel.setText("INFO:" + "Begin year is less than possible.");
+            return false;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        beginDateDay = Integer.parseInt(endDate[0]);
+        beginDateMonth = Integer.parseInt(endDate[1]) - 1;
+        beginDateYear = Integer.parseInt(endDate[2]);
+        if (now.getYear() > beginDateYear ||
+                now.getYear() == beginDateYear && beginDateMonth + 1 > now.getMonth().getValue() ||
+                now.getYear() == beginDateYear && beginDateMonth + 1 == now.getMonth().getValue() && beginDateDay > now.getDayOfMonth()) {
+            infoLabel.setText("INFO:" + "End date is wrong. Please fix it.");
+            return false;
+        }
+        //set date
+        data.setBeginData(Integer.parseInt(beginDate[0]),
+                Integer.parseInt(beginDate[1]) - 1,
+                Integer.parseInt(beginDate[2]));
+        data.setEndData(Integer.parseInt(endDate[0]),
+                Integer.parseInt(endDate[1]) - 1,
+                Integer.parseInt(endDate[2]));
+        return true;
+    }
+private boolean isDataModified = false;
     @FXML
     public void onGetDataButton() {
         try {
             JfreeCandlestickChart temp = new JfreeCandlestickChart("heh");
             String interval = (String) intervalCB.getValue();
-            if(!temp.setInterval(interval, intervalList, infoLabel){
+            if (!temp.setInterval(interval, intervalList, infoLabel)) {
                 return;
             }
-            //get date
-            var beginDateStr = ((String) beginDateTF.getText());
-            var endDateStr = ((String) endDateTF.getText());
-            //analyze date
-            if (!TimeUtils.isValidDate(beginDateStr)) {
-                infoLabel.setText("INFO:" + "Begin date is wrong.");
+            if (!solveDateProblem()) {
                 return;
             }
-            if (!TimeUtils.isValidDate(endDateStr)) {
-                infoLabel.setText("INFO:" + "End date is wrong.");
-                return;
+            if(isDataModified) {
+                data.getData();
+                for (int i = 0; i < data.data.size(); ++i) {
+                    temp.onTrade(data.data.get(i));
+                }
             }
-            var beginDate = beginDateStr.split("\\.");
-            var endDate = endDateStr.split("\\.");
-            var beginDateDay = Integer.parseInt(beginDate[0]);
-            var beginDateMonth = Integer.parseInt(beginDate[1]) - 1;
-            var beginDateYear = Integer.parseInt(beginDate[2]);
-            var beginMinDate = data.getMinDate().split("\\.");
-            //if(beginDateDay>) TODO: Add checking of begin date and final date
-            //set date
-            data.setBeginData(Integer.parseInt(beginDate[0]),
-                    Integer.parseInt(beginDate[1]) - 1,
-                    Integer.parseInt(beginDate[2]));
-            data.setEndData(Integer.parseInt(endDate[0]),
-                    Integer.parseInt(endDate[1]) - 1,
-                    Integer.parseInt(endDate[2]));
-            data.getData();
-
-            for (int i = 0; i < data.data.size(); ++i) {
-                temp.onTrade(data.data.get(i));
-            }
-            temp.fillIndicators(data.data, 6, 0.5, 12, 26, 9); // TODO: take numbers from text fields and check it before
+            solveIndicatorsProblem(temp);
             var chartAndWindowName = (String) marketCB.getValue() + " " +
                     (String) quoteCB.getValue() + " " +
                     beginDateTF.getText() + "-" +
@@ -388,8 +443,9 @@ public class MainController {
             stage.setTitle(chartAndWindowName);
             stage.show();
             stageList.add(stage);
+            isDataModified = false;
         } catch (Exception e) {
-            infoLabel.setText("INFO:" + "Something wrong.Problem:"+e.getMessage());
+            infoLabel.setText("INFO:" + "Something wrong.Problem:" + e.getMessage());
         }
     }
 }
