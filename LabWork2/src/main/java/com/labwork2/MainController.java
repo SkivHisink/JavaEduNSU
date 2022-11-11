@@ -260,6 +260,7 @@ public class MainController {
             Platform.runLater(() -> {
                 setElementDisable(false);
             });
+            isDataModified = true;
         };
         Thread myThread = new Thread(run, "MarketThread");
         setElementDisable(true);
@@ -299,6 +300,7 @@ public class MainController {
             Platform.runLater(() -> {
                 setElementDisable(false);
             });
+            isDataModified = true;
         };
         Thread myThread = new Thread(run, "QuoteThread");
         setElementDisable(true);
@@ -325,6 +327,7 @@ public class MainController {
             Platform.runLater(() -> {
                 setElementDisable(false);
             });
+            isDataModified = true;
         };
         Thread myThread = new Thread(run, "IntervalThread");
         setElementDisable(true);
@@ -405,7 +408,9 @@ public class MainController {
                 Integer.parseInt(endDate[2]));
         return true;
     }
-private boolean isDataModified = false;
+
+    private boolean isDataModified = false;
+
     @FXML
     public void onGetDataButton() {
         try {
@@ -417,9 +422,9 @@ private boolean isDataModified = false;
             if (!solveDateProblem()) {
                 return;
             }
-            if(isDataModified) {
+            if (isDataModified) {
                 data.getData();
-                for (int i = 0; i < data.data.size(); ++i) {
+                for (int i = 0; i < data.data.size(); ++i) { // add multithreading?
                     temp.onTrade(data.data.get(i));
                 }
             }
@@ -444,6 +449,7 @@ private boolean isDataModified = false;
             stage.show();
             stageList.add(stage);
             isDataModified = false;
+            infoLabel.setText("INFO:" + "All done.");
         } catch (Exception e) {
             infoLabel.setText("INFO:" + "Something wrong.Problem:" + e.getMessage());
         }
