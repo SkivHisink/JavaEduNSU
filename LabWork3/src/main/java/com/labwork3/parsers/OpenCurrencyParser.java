@@ -2,6 +2,7 @@ package com.labwork3.parsers;
 
 import javafx.util.Pair;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -12,29 +13,30 @@ public class OpenCurrencyParser extends SeleniumParserBase {
     {
         super();
         InitURL = "https://www.open.ru/exchange-person";
-        currancyNames = new ArrayList<>();
-        currancyNames.add("USD");
-        currancyNames.add("EUR");
-        currancyNames.add("GBP");
-        currancyNames.add("CHF");
-        currancyNames.add("JPY");
-        currancyNames.add("CNY");
-        currancyNames.add("KZT");
+        CurrencyNames = new ArrayList<>();
+        CurrencyNames.add("USD");
+        CurrencyNames.add("EUR");
+        CurrencyNames.add("GBP");
+        CurrencyNames.add("CHF");
+        CurrencyNames.add("JPY");
+        CurrencyNames.add("CNY");
+        CurrencyNames.add("KZT");
+        BankName = "Открытие";
     }
 
     @Override
-    public void fillCurrancyList() {
-        var currancyBuyList = driver
+    public void fillCurrencyList( WebDriver driver) {
+        var currencyBuyList = driver
                 .findElements(By.xpath(
                         "//td[@class='card-rates-table__cell card-rates-table__sale large-text']"));
-        var currancySellList = driver
+        var currencySellList = driver
                 .findElements(By.xpath(
                         "//td[@class='card-rates-table__cell card-rates-table__purchase large-text']"));
         NumberFormat nf = NumberFormat.getInstance(Locale.FRANCE); // открытие = Франция
-        for (int i = 0; i < currancyBuyList.size(); ++i) {
+        for (int i = 0; i < currencyBuyList.size(); ++i) {
             try {
-                CurrancyBuyList.add(new Pair<>(currancyNames.get(i), nf.parse(currancyBuyList.get(i).getText()).doubleValue()));
-                CurrancySellList.add(new Pair<>(currancyNames.get(i), nf.parse(currancySellList.get(i).getText()).doubleValue()));
+                CurrencyBuyList.add(new Pair<>(CurrencyNames.get(i), nf.parse(currencyBuyList.get(i).getText()).doubleValue()));
+                CurrencySellList.add(new Pair<>(CurrencyNames.get(i), nf.parse(currencySellList.get(i).getText()).doubleValue()));
             }
             catch(Exception e){
 

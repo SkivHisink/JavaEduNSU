@@ -203,7 +203,7 @@ boolean isOpenDialog = false;
             tmp = paymentMethod.getFirstMonthFee();
             tmp.setN(0);
             resultTable.getItems().add(tmp);
-            int calcperSum = 0;
+            int calcPerSum = 0;
             for (int i = 1; i < reader.getCreditTermVal() + 1; ++i) {
                 tmp = paymentMethod.getNotFirstMonthFee(i, info);
                 if (tmp == null) {
@@ -211,7 +211,7 @@ boolean isOpenDialog = false;
                 }
                 tmp.setN(i);
                 resultTable.getItems().add(tmp);
-                calcperSum += tmp.getPercentSum();
+                calcPerSum += tmp.getPercentSum();
             }
             if (tmp == null) {
                 infoText.setText(Utility.InfoBegin + info);
@@ -223,7 +223,7 @@ boolean isOpenDialog = false;
             tmp.setFeeLeft(0);
             tmp.setSumOfFee(Utility.bankingRound(
                     tmp.getGeneralPaymentSize()-tmp.getPercentSum()));
-            percentPaySum.setText(percentPaySumBegin+calcperSum);
+            percentPaySum.setText(percentPaySumBegin+calcPerSum);
             resultTable.getItems().set(resultTable.getItems().size() - 1, (Object) tmp);
         } catch (Exception e) {
             infoText.setText(Utility.InfoBegin +
