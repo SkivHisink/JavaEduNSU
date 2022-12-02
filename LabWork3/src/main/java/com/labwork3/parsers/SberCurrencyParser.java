@@ -24,7 +24,7 @@ public class SberCurrencyParser extends SeleniumParserBase{
         var currancyList = driver
                 .findElements(By.xpath(
                         "//div[@class='kitt-text kitt-text_size_m']"));
-        NumberFormat nf = NumberFormat.getInstance(Locale.FRANCE); // сбер = Франция
+        NumberFormat nf = NumberFormat.getInstance(Locale.FRANCE);
         int i = 0;
         int j =0;
         for (; i < currancyList.size(); ++i) {

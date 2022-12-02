@@ -42,7 +42,7 @@ public class VtbCurrencyParcer extends SeleniumParserBase {
                         "//p[@class='typographystyles__Box-foundation-kit__sc-14qzghz-0 jEFSaq numbersstyles__TypographyTitle-foundation-kit__sc-1xhbrzd-4 haHdlc']"));
         int i = 0;
         int j = 0;
-        NumberFormat nf = NumberFormat.getInstance(Locale.FRANCE); // втб = Франция
+        NumberFormat nf = NumberFormat.getInstance(Locale.FRANCE);
         for (; i < currancyList.size(); ++i) {
             CurrencyBuyList.add(new Pair<>(CurrencyNames.get(j), nf.parse(currancyList.get(i).getText()).doubleValue()));
             i++;
