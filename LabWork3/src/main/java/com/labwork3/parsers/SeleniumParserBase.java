@@ -2,12 +2,9 @@ package com.labwork3.parsers;
 
 import javafx.util.Pair;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.remote.CapabilityType;
 
+import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public abstract class SeleniumParserBase {
@@ -34,8 +31,5 @@ public abstract class SeleniumParserBase {
         isConnected = true;
     }
 
-    public void fillCurrencyList(){
-    }
-
-    public abstract void fillCurrencyList(WebDriver driver);
+    public abstract void fillCurrencyList(WebDriver driver) throws ParseException;
 }

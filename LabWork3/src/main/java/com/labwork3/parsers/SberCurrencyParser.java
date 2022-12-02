@@ -15,8 +15,6 @@ public class SberCurrencyParser extends SeleniumParserBase{
         InitURL = "http://www.sberbank.ru/ru/quotes/currencies?tab=sbol&currency=USD,EUR";
         CurrencyNames = new ArrayList<>();
         CurrencyNames.add("USD");
-        CurrencyNames.add("USD");
-        CurrencyNames.add("EUR");
         CurrencyNames.add("EUR");
         BankName = "Сбер";
     }
@@ -27,11 +25,14 @@ public class SberCurrencyParser extends SeleniumParserBase{
                 .findElements(By.xpath(
                         "//div[@class='kitt-text kitt-text_size_m']"));
         NumberFormat nf = NumberFormat.getInstance(Locale.FRANCE); // сбер = Франция
-        for (int i = 0; i < currancyList.size(); ++i) {
+        int i = 0;
+        int j =0;
+        for (; i < currancyList.size(); ++i) {
             try {
-                CurrencyBuyList.add(new Pair<>(CurrencyNames.get(i), nf.parse(currancyList.get(i).getText()).doubleValue()));
+                CurrencyBuyList.add(new Pair<>(CurrencyNames.get(j), nf.parse(currancyList.get(i).getText()).doubleValue()));
                 i++;
-                CurrencySellList.add(new Pair<>(CurrencyNames.get(i), nf.parse(currancyList.get(i).getText()).doubleValue()));
+                CurrencySellList.add(new Pair<>(CurrencyNames.get(j), nf.parse(currancyList.get(i).getText()).doubleValue()));
+                j++;
             }
             catch(Exception e){
 

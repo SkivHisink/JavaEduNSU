@@ -1,11 +1,15 @@
 package com.labwork3;
 
 import com.labwork3.parsers.*;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.Pair;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -24,7 +28,8 @@ public class MainController {
     @FXML
     private Label welcomeText;
     private List<SeleniumParserBase> bankList;
-    private WebDriver driver;
+    public static WebDriver driver;
+
     @FXML
     protected void onHelloButtonClick() {
         welcomeText.setText("Welcome to JavaFX Application!");
@@ -50,13 +55,13 @@ public class MainController {
     }
 
     public MainController() {
-        // TODO: make some fabric?
         driver = new ChromeDriver(stdOptionsInit().getKey());
+        // TODO: make some fabric?
         VtbCurrencyParcer vtb = new VtbCurrencyParcer();
         SberCurrencyParser sber = new SberCurrencyParser();
         AlfaCurrencyParser alfa = new AlfaCurrencyParser();
         OpenCurrencyParser open = new OpenCurrencyParser();
-        List<SeleniumParserBase> bankList = new ArrayList<>();
+        bankList = new ArrayList<>();
         bankList.add(vtb);
         bankList.add(sber);
         bankList.add(alfa);
@@ -65,8 +70,13 @@ public class MainController {
 
     private void fillTable(List<SeleniumParserBase> bankList) {
         resultTable.getColumns().clear();
-        resultTable.getColumns().add(new TableColumn<>("Bank"));
-        List<TableColumn> currencyColList = new ArrayList<>();
+        int index = 0;
+        TableColumn<ObservableList<String>, String> table = new TableColumn<>("Bank");
+        int finalIndex2 = index;
+        table.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue().get(finalIndex2)));
+        index++;
+        resultTable.getColumns().add(table);
+        List<String> currencyColNamesList = new ArrayList<>();
         //we add currency only if we have more than two banks with that currency
         List<String> bestCurrencyList = new ArrayList<>();
         double value = 1;
@@ -82,14 +92,49 @@ public class MainController {
         //finding duplicated currencies
         for (int i = 0; i < bankList.size(); ++i) {
             var tempBank = bankList.get(i);
-            if (tempBankName != tempBank.BankName) {
+            if (!tempBankName.equals(tempBank.BankName)) {
                 for (int j = 0; j < tempBank.CurrencyNames.size(); ++j) {
-                    if (tempBank.CurrencyNames.get(j).equals(bestCurrencyList.get(j))) {
-                        resultTable.getColumns().add(bestCurrencyList.get(j));
+                    var tempCurrency = tempBank.CurrencyNames.get(j);
+                    if (bestCurrencyList.contains(tempCurrency) && !currencyColNamesList.contains(tempCurrency)) {
+                        //resultTable.getColumns().add(new TableColumn<>("Buy " + tempCurrency));
+                        table = new TableColumn<>("Buy " + tempCurrency);
+                        int finalIndex = index;
+                        table.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue().get(finalIndex)));
+                        index++;
+                        resultTable.getColumns().add(table);
+                        //((TableColumn)resultTable.getColumns().get(resultTable.getColumns().size()-1)).setCellValueFactory(new PropertyValueFactory<>("Buy" + tempCurrency));
+                        //resultTable.getColumns().add(new TableColumn<>("Sell " + tempCurrency));
+                        table = new TableColumn<>("Sell " + tempCurrency);
+                        int finalIndex1 = index;
+                        table.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue().get(finalIndex1)));
+                        resultTable.getColumns().add(table);
+                        index++;
+                        //((TableColumn)resultTable.getColumns().get(resultTable.getColumns().size()-1)).setCellValueFactory(new PropertyValueFactory<>("Sell" + tempCurrency));
+                        currencyColNamesList.add(tempCurrency);
                     }
                 }
             }
         }
+        ObservableList<ObservableList<String>> data = FXCollections.observableArrayList();
+        for (int i = 0; i < bankList.size(); ++i) {
+            ObservableList<String> bankCurrencies = FXCollections.observableArrayList();
+            bankCurrencies.clear();
+            var tempBank =  bankList.get(i);
+            bankCurrencies.add(tempBank.BankName);
+            for (int j = 0; j < currencyColNamesList.size(); ++j) {
+                int currencyIndex = tempBank.CurrencyNames.indexOf(currencyColNamesList.get(j));
+                if (currencyIndex != -1 && tempBank.CurrencyBuyList.size() > currencyIndex) {
+                    bankCurrencies.add(tempBank.CurrencyBuyList.get(currencyIndex).getValue().toString());
+                    bankCurrencies.add(tempBank.CurrencySellList.get(currencyIndex).getValue().toString());
+                }
+                else{
+                    bankCurrencies.add("?");
+                    bankCurrencies.add("?");
+                }
+            }
+            data.add(bankCurrencies);
+        }
+        resultTable.setItems(data);
     }
 
     private boolean connect(List<SeleniumParserBase> bankList) {
@@ -97,9 +142,9 @@ public class MainController {
             try {
                 var tempBank = bankList.get(i);
                 tempBank.connect(driver);
-                tempBank.fillCurrencyList();
+                tempBank.fillCurrencyList(driver);
             } catch (Exception e) {
-                return false;
+                //return false;
             }
         }
         return true;

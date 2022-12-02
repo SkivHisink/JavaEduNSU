@@ -16,7 +16,13 @@ public class HelloApplication extends Application {
         stage.setScene(scene);
         stage.show();
     }
-
+    @Override
+    public void stop(){
+        if(MainController.driver != null) {
+            MainController.driver.quit();
+        }
+        System.out.println("Stage is closing");
+    }
     public static void main(String[] args) {
         launch();
     }

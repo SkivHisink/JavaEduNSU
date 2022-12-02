@@ -32,7 +32,7 @@ public class OpenCurrencyParser extends SeleniumParserBase {
         var currencySellList = driver
                 .findElements(By.xpath(
                         "//td[@class='card-rates-table__cell card-rates-table__purchase large-text']"));
-        NumberFormat nf = NumberFormat.getInstance(Locale.FRANCE); // открытие = Франция
+        NumberFormat nf = NumberFormat.getInstance(Locale.FRANCE);
         for (int i = 0; i < currencyBuyList.size(); ++i) {
             try {
                 CurrencyBuyList.add(new Pair<>(CurrencyNames.get(i), nf.parse(currencyBuyList.get(i).getText()).doubleValue()));
