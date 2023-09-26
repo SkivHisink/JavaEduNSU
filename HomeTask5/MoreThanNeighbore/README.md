@@ -1,1 +1,1 @@
-![image](..//Images//HomeTask10.png)
+![image](..//..//Images//HomeTask10.png)
