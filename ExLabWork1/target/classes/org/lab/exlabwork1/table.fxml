@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="534.0" prefWidth="666.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.lab.exlabwork1.View.TableViewer">
+    <children>
+        <TableView fx:id="resultTable" layoutX="1.0" prefHeight="534.0" prefWidth="664.0">
+            <columns>
+                <TableColumn fx:id="column1" editable="false" prefWidth="28.0" text="n" />
+                <TableColumn fx:id="column2" editable="false" prefWidth="105" text="Кол-во дней пользования заемными средствами" />
+                <TableColumn fx:id="column3" editable="false" prefWidth="94" text="Дата платежа" />
+                <TableColumn fx:id="column4" prefWidth="153" text="Общая сумма платежа" />
+                <TableColumn prefWidth="282" text="в том числе">
+                    <columns>
+                        <TableColumn fx:id="column5" prefWidth="94.0" text="сумма процентов" />
+                        <TableColumn fx:id="column6" prefWidth="94.0" text="сумма погашаемого долга" />
+                        <TableColumn fx:id="column7" prefWidth="94.0" text="остаток задолжности" />
+                    </columns>
+                </TableColumn>
+            </columns>
+        </TableView>
+    </children>
+</AnchorPane>
